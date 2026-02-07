@@ -1,9 +1,12 @@
 import React from 'react'
 
+import Layout from './components/layout/Layout'
+import Router from './routes/Router'
+
 const App = () => {
   return (
     <div>
-         <h1 className="text-red-300">hello</h1>
+      <Router/>
     </div>
   )
 }
