@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Leaf } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth0 } from '@auth0/auth0-react';
 
 const Register = () => {
+  const { loginWithRedirect } = useAuth0();
+
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
@@ -267,6 +270,7 @@ const Register = () => {
             whileHover={{ scale: 1.02, backgroundColor: '#f9fafb' }}
             whileTap={{ scale: 0.98 }}
             type="button"
+             onClick={() => loginWithRedirect()} 
             className="w-full py-3.5 bg-white border border-gray-200 text-gray-700 font-medium rounded-xl flex items-center justify-center gap-3 hover:border-gray-300 transition-all duration-200"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
