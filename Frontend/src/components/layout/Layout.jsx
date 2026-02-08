@@ -8,7 +8,7 @@ const Layout = () => {
   const location = useLocation();
   const path = location.pathname
 
-  const noHeaderFooterRoutes = ['/ngo/register', '/ngo/login', '/donor/register', '/donor/login'];
+  const noHeaderFooterRoutes = ['/ngo/register', '/ngo/login', '/donor/register', '/donor/login','/privacy','/terms','/cookies'];
   const hideHeaderFooter = noHeaderFooterRoutes.includes(path);
 
   if (hideHeaderFooter) {

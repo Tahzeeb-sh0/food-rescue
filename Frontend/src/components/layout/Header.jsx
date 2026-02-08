@@ -8,7 +8,7 @@ const Header = () => {
   const location = useLocation();
 
   const navLinks = [
-    { name: 'How It Works', path: '/how-it-works', icon: <Heart className="w-4 h-4" /> },
+    { name: 'How It Works', path: '/howitworks', icon: <Heart className="w-4 h-4" /> },
     { name: 'Impact', path: '/impact', icon: <Globe className="w-4 h-4" /> },
     { name: 'Our Network', path: '/network', icon: <Users className="w-4 h-4" /> },
   ];
