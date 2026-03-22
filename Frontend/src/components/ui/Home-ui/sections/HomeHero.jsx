@@ -1,234 +1,101 @@
 import React, { useEffect, useState } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, Play, Leaf, TrendingUp } from "lucide-react";
-import HeroImageCompoent from "../ui-components/HeroImageCompoent";
+import { ArrowRight, BarChart2, CheckCircle2 } from "lucide-react";
 
 const HomeHero = () => {
   const [mealCount, setMealCount] = useState(542918);
-  const { scrollY } = useScroll();
 
-  // Parallax effect for background elements
-  const y1 = useTransform(scrollY, [0, 500], [0, 100]);
-  const y2 = useTransform(scrollY, [0, 500], [0, -50]);
-
-  // Simulate live counter
   useEffect(() => {
     const interval = setInterval(() => {
       setMealCount((prev) => prev + Math.floor(Math.random() * 3));
-    }, 3000);
+    }, 4000);
     return () => clearInterval(interval);
   }, []);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      },
-    },
-  };
-
-  const imageVariants = {
-    hidden: { opacity: 0, scale: 0.9, x: 50 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      x: 0,
-      transition: {
-        duration: 1,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      },
-    },
-  };
-
-  const floatVariants = {
-    animate: {
-      y: [-10, 10, -10],
-      transition: {
-        duration: 6,
-        repeat: Infinity,
-        ease: "easeInOut",
-      },
-    },
-  };
-
-  const pulseVariants = {
-    animate: {
-      scale: [1, 1.05, 1],
-      opacity: [0.8, 1, 0.8],
-      transition: {
-        duration: 2,
-        repeat: Infinity,
-        ease: "easeInOut",
-      },
-    },
-  };
-
   return (
-    <section className="relative min-h-screen bg-gradient-to-br from-gray-50 via-white to-green-50 overflow-hidden">
-      {/* Animated Background Shapes */}
-      <motion.div
-        style={{ y: y1 }}
-        className="absolute top-20 left-10 w-72 h-72 bg-green-200/30 rounded-full blur-3xl"
-        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-        transition={{ duration: 8, repeat: Infinity }}
-      />
-      <motion.div
-        style={{ y: y2 }}
-        className="absolute bottom-20 right-10 w-96 h-96 bg-emerald-200/20 rounded-full blur-3xl"
-        animate={{ scale: [1, 1.3, 1], opacity: [0.2, 0.4, 0.2] }}
-        transition={{ duration: 10, repeat: Infinity }}
-      />
+    <section className="bg-white">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-16 pb-20 lg:pt-24 lg:pb-28">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          
+          {/* Left Content - Structured & Typography Focused */}
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 text-primary-700 text-sm font-semibold mb-8 border border-primary-100 uppercase tracking-wide">
+              <span className="w-2 h-2 rounded-full bg-primary-600 animate-pulse"></span>
+              Global Food Rescue Initiative
+            </div>
+            
+            <h1 className="text-5xl lg:text-6xl font-bold font-serif text-slate-900 leading-[1.15] mb-6">
+              Transforming Surplus Food into <span className="text-primary-700">Hope.</span>
+            </h1>
+            
+            <p className="text-lg text-slate-600 leading-relaxed mb-10 max-w-xl">
+              Our organization links hotels, event organizers, and corporate cafeterias directly with verified NGOs. We ensure perfectly viable surplus food reaches vulnerable communities securely and systematically.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 mb-10">
+              <button className="btn-primary">
+                Donate Surplus Food
+              </button>
+              <button className="btn-outline">
+                Register as NGO
+              </button>
+            </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pt-20 pb-32">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Left Content */}
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="relative z-10"
-          >
-            {/* Badge */}
-            <motion.div
-              variants={itemVariants}
-              className="inline-flex items-center gap-2 mb-6"
-            >
-              <motion.span
-                variants={pulseVariants}
-                animate="animate"
-                className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-semibold border border-green-200"
-              >
-                <Leaf className="w-4 h-4" />
-                RESCUING EVENT SURPLUS
-              </motion.span>
-            </motion.div>
+            <div className="flex items-center gap-8 pt-8 border-t border-slate-200">
+              <div className="flex flex-col">
+                <span className="text-sm text-slate-500 font-medium uppercase tracking-wider mb-1">Meals Delivered</span>
+                <span className="text-3xl font-bold font-serif text-slate-900 tabular-nums">
+                  {mealCount.toLocaleString()}
+                </span>
+              </div>
+              <div className="h-10 w-px bg-slate-200"></div>
+              <div className="flex flex-col">
+                <span className="text-sm text-slate-500 font-medium uppercase tracking-wider mb-1">Active Partners</span>
+                <span className="text-3xl font-bold font-serif text-slate-900">8,400+</span>
+              </div>
+            </div>
+          </div>
 
-            {/* Headline */}
-            <motion.h1
-              variants={itemVariants}
-              className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 leading-[1.1] mb-6"
-            >
-              Turn{" "}
-              <motion.span
-                className="text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-emerald-600 inline-block"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                Excess
-              </motion.span>
-              <br />
-              into Access
-            </motion.h1>
-
-            {/* Subheadline */}
-            <motion.p
-              variants={itemVariants}
-              className="text-lg text-gray-600 leading-relaxed mb-8 max-w-lg"
-            >
-              Transform wedding feasts and event surplus into life-saving meals
-              for those in need. Connect with local NGOs instantly and track
-              your environmental impact.
-            </motion.p>
-
-            {/* CTA Buttons */}
-            <motion.div
-              variants={itemVariants}
-              className="flex flex-wrap gap-4 mb-12"
-            >
-              <motion.button
-                whileHover={{
-                  scale: 1.05,
-                  boxShadow: "0 20px 40px rgba(33, 196, 93, 0.3)",
-                }}
-                whileTap={{ scale: 0.95 }}
-                className="group flex items-center gap-2 px-8 py-4 bg-[#21c45d] text-white font-bold rounded-full shadow-lg shadow-green-500/30 transition-all"
-              >
-                Start Donating Today
-                <motion.span
-                  initial={{ x: 0 }}
-                  whileHover={{ x: 5 }}
-                  transition={{ type: "spring", stiffness: 400 }}
-                >
-                  <ArrowRight className="w-5 h-5" />
-                </motion.span>
-              </motion.button>
-
-              <motion.button
-                whileHover={{ scale: 1.05, backgroundColor: "#f3f4f6" }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 px-8 py-4 bg-white text-gray-700 font-semibold rounded-full border-2 border-gray-200 hover:border-gray-300 transition-all"
-              >
-                <Play className="w-5 h-5 text-green-500" />
-                View Live Impact
-              </motion.button>
-            </motion.div>
-          </motion.div>
-
-          {/* Right Content - Image & Stats */}
-          <HeroImageCompoent />
+          {/* Right Content - Clean Grid Collage */}
+          <div className="relative">
+            {/* Main Image */}
+            <div className="aspect-[4/5] rounded-lg overflow-hidden border border-slate-200 shadow-xl shadow-slate-200/50">
+               <img 
+                 src="https://images.unsplash.com/photo-1593113565214-802c6110f0d4?q=80&w=2940&auto=format&fit=crop" 
+                 alt="Volunteers packing nutritious food for delivery" 
+                 className="w-full h-full object-cover"
+               />
+            </div>
+            
+            {/* Overlay Info Card */}
+            <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-lg shadow-xl shadow-slate-200/80 border border-slate-100 max-w-[280px]">
+               <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 bg-accent-50 rounded flex items-center justify-center text-accent-600">
+                     <CheckCircle2 size={24} />
+                  </div>
+                  <h3 className="font-bold font-serif text-slate-900">Quality Assured</h3>
+               </div>
+               <p className="text-sm text-slate-600 mb-4 font-medium">All food transfers adhere to strict safety and hygiene protocols.</p>
+               <a href="#" className="inline-flex items-center text-primary-700 font-semibold text-sm hover:text-primary-800 uppercase tracking-wide">
+                 Read Our Policy <ArrowRight size={16} className="ml-1" />
+               </a>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Bottom Stats Bar */}
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1, duration: 0.8 }}
-        className="absolute bottom-0 left-0 right-0 bg-green-100 backdrop-blur-md border-t border-gray-100"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="w-3 h-3 bg-green-500 rounded-full"
-              />
-              <span className="text-sm font-bold text-green-600 uppercase tracking-wider">
-                Live Rescue Counter
-              </span>
-            </div>
-
-            <div className="flex items-baseline gap-2">
-              <motion.span
-                key={mealCount}
-                initial={{ scale: 1.2, color: "#21c45d" }}
-                animate={{ scale: 1, color: "#111827" }}
-                className="text-4xl font-bold text-gray-900 tabular-nums"
-              >
-                {mealCount.toLocaleString()}
-              </motion.span>
-              <span className="text-gray-500 font-medium">
-                Total Meals Shared
-              </span>
-            </div>
-
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.5 }}
-              className="text-sm text-gray-400 italic hidden sm:block"
-            >
-              "Your surplus could be someone's first meal today."
-            </motion.p>
+      {/* Corporate Trust Bar */}
+      <div className="bg-slate-50 border-y border-slate-200 py-10">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+          <p className="text-sm font-semibold text-slate-500 uppercase tracking-widest mb-6">Trusted by leading organizations globally</p>
+          <div className="flex flex-wrap justify-center gap-12 lg:gap-20 opacity-50 grayscale hover:grayscale-0 transition-all">
+             {/* Simulated Corporate Logos (Text for placeholder) */}
+             <span className="text-2xl font-black font-serif text-slate-800">UNICEF</span>
+             <span className="text-2xl font-black font-serif text-slate-800 tracking-tighter">RED CROSS</span>
+             <span className="text-2xl font-bold text-slate-800 tracking-widest flex items-center gap-2"><BarChart2 className="inline"/> OXFAM</span>
+             <span className="text-2xl font-black font-serif text-slate-800 tracking-tight">CARE Int.</span>
           </div>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 };

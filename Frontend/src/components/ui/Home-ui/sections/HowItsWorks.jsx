@@ -1,186 +1,94 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { ClipboardList, Bell, Truck } from 'lucide-react';
+import { Camera, MapPin, Truck } from 'lucide-react';
 
 const HowItWorks = () => {
   const steps = [
     {
-      icon: ClipboardList,
-      title: 'List Surplus',
-      description: 'Snap a photo and upload details of your excess food, dietary types, and collection window in seconds.',
-      color: 'bg-green-50',
-      iconColor: 'text-green-500',
+      icon: Camera,
+      title: 'Step 1: Secure Declaration',
+      description: 'Corporate donors register surplus inventory utilizing our compliant web portal. Information includes dietary tags and mass.',
+      color: 'bg-primary-50',
+      iconColor: 'text-primary-700',
     },
     {
-      icon: Bell,
-      title: 'Instant Alert',
-      description: 'Verified NGOs within a 10km radius receive a notification to claim the donation immediately.',
-      color: 'bg-green-50',
-      iconColor: 'text-green-500',
+      icon: MapPin,
+      title: 'Step 2: Logistical Match',
+      description: 'The algorithmic dispatcher assigns the batch to the closest capacity-verified NGO partner.',
+      color: 'bg-primary-50',
+      iconColor: 'text-primary-700',
     },
     {
       icon: Truck,
-      title: 'Safe Rescue',
-      description: 'NGO partners collect the food using food-safe transport and distribute it to local community centers.',
-      color: 'bg-green-50',
-      iconColor: 'text-green-500',
+      title: 'Step 3: Protocol Transfer',
+      description: 'The authorized NGO secures the payload via confirmation code, verifying the chain of custody.',
+      color: 'bg-primary-50',
+      iconColor: 'text-primary-700',
     },
   ];
 
   const stats = [
-    { value: '542K+', label: 'MEALS SERVED' },
-    { value: '120+', label: 'NGO PARTNERS' },
-    { value: '15K', label: 'KG FOOD SAVED' },
-    { value: '8.2T', label: 'CO2 PREVENTED' },
+    { value: '12.5M', label: 'MEALS SERVED' },
+    { value: '8,400', label: 'VERIFIED NGOs' },
+    { value: '1,500T', label: 'VOLUME DIVERTED' },
+    { value: '45K', label: 'CO2 MITIGATED' },
   ];
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      },
-    },
-  };
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 40 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.7,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      },
-    },
-  };
-
-  const statVariants = {
-    hidden: { opacity: 0, scale: 0.9 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut",
-      },
-    },
-  };
-
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-12 bg-gray-50">
-      <div className="max-w-6xl mx-auto">
+    <section className="py-24 px-6 lg:px-8 bg-slate-50 border-b border-slate-200">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            How It Works
+        <div className="text-center mb-16 max-w-2xl mx-auto">
+          <h2 className="text-3xl font-bold font-serif text-slate-900 mb-4">
+            A Transparent Operations Framework
           </h2>
-          <p className="text-gray-500 max-w-xl mx-auto">
-            Our streamlined process ensures that food reaches those who need it most, safely and efficiently.
+          <p className="text-slate-600 leading-relaxed text-lg">
+            Our platform guarantees seamless logistical execution while simultaneously enforcing strict standards of accountability.
           </p>
-        </motion.div>
+        </div>
 
         {/* Steps Cards */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid md:grid-cols-3 gap-6 mb-16"
-        >
-          {steps.map((step, index) => (
-            <motion.div
+        <div className="grid md:grid-cols-3 gap-8 mb-20">
+          {steps.map((step) => (
+            <div
               key={step.title}
-              variants={cardVariants}
-              whileHover={{ y: -8, transition: { duration: 0.3 } }}
-              className="bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl transition-shadow duration-300"
+              className="structured-card p-10 hover:border-primary-300 transition-colors"
             >
               {/* Icon */}
-              <motion.div
-                initial={{ scale: 0 }}
-                whileInView={{ scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.3 + index * 0.1, type: "spring", stiffness: 200 }}
-                className={`w-14 h-14 ${step.color} rounded-2xl flex items-center justify-center mb-6`}
-              >
+              <div className={`w-14 h-14 ${step.color} border border-primary-100 rounded flex items-center justify-center mb-6`}>
                 <step.icon className={`w-6 h-6 ${step.iconColor}`} />
-              </motion.div>
+              </div>
 
               {/* Title */}
-              <h3 className="text-xl font-bold text-gray-900 mb-3">
+              <h3 className="text-xl font-bold font-serif text-slate-900 mb-3">
                 {step.title}
               </h3>
 
               {/* Description */}
-              <p className="text-gray-500 text-sm leading-relaxed">
+              <p className="text-slate-600 text-sm leading-relaxed">
                 {step.description}
               </p>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
 
         {/* Stats Bar */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="bg-[#21c45d] rounded-3xl px-8 py-12 md:px-16"
-        >
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-8"
-          >
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                variants={statVariants}
-                custom={index}
-                className="text-center"
-              >
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.5 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ 
-                    delay: 0.6 + index * 0.1, 
-                    type: "spring", 
-                    stiffness: 150 
-                  }}
-                  className="text-4xl md:text-5xl font-bold text-white mb-2"
-                >
+        <div className="bg-primary-900 rounded border border-primary-800 px-8 py-12 md:px-16 shadow-sm relative overflow-hidden">
+          {/* Subtle graphic interference pattern */}
+          <div className="absolute inset-0 opacity-10 background-pattern"></div>
+          
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 relative z-10">
+            {stats.map((stat) => (
+              <div key={stat.label} className="text-center px-4 border-slate-700 last:border-0 lg:border-r border-slate-700/50">
+                <div className="text-4xl md:text-5xl font-bold font-serif text-white mb-3">
                   {stat.value}
-                </motion.div>
-                <div className="text-green-100 text-xs font-semibold tracking-wider">
+                </div>
+                <div className="text-primary-300 text-xs font-bold uppercase tracking-widest">
                   {stat.label}
                 </div>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
     </section>
   );
