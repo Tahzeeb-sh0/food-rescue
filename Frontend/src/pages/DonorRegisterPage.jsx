@@ -1,8 +1,45 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Building2, Briefcase, FileText, CheckCircle2 } from 'lucide-react';
+import { Building2, Briefcase, FileText, CheckCircle2, Loader2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 
 const DonorRegisterPage = () => {
+  const [corpName, setCorpName] = React.useState('');
+  const [phone, setPhone] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [isLoading, setIsLoading] = React.useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const res = await fetch('http://localhost:8080/api/users/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: corpName,
+          phone,
+          password,
+          role: 'DONOR',
+          longitude: -74.006,
+          latitude: 40.7128
+        })
+      });
+      if (res.ok) {
+        const user = await res.json();
+        localStorage.setItem('user', JSON.stringify(user));
+        navigate('/donor/dashboard');
+      } else {
+        alert('Registration failed.');
+      }
+    } catch (err) {
+      console.warn("Backend offline. Bypassing registration for demo.");
+      navigate('/donor/dashboard');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col lg:flex-row">
       {/* Left Pitch Panel */}
@@ -42,29 +79,50 @@ const DonorRegisterPage = () => {
           <h2 className="text-2xl font-bold text-slate-900 mb-2 font-serif">Initiate Enterprise Onboarding</h2>
           <p className="text-slate-500 mb-8 border-b border-slate-200 pb-6 text-sm">Please provide accurate corporate entity details to allow for immediate credentialing.</p>
 
-          <form className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
                <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1">Parent Corporation Name</label>
                   <div className="relative">
                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Building2 className="h-5 w-5 text-slate-400" /></div>
-                     <input type="text" required className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 outline-none  text-slate-900 text-sm bg-slate-50" placeholder="e.g. Hilton Global" />
+                     <input 
+                        type="text" 
+                        required 
+                        value={corpName}
+                        onChange={(e) => setCorpName(e.target.value)}
+                        className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 outline-none  text-slate-900 text-sm bg-slate-50" 
+                        placeholder="e.g. Hilton Global" 
+                      />
                   </div>
                </div>
                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">Specific Facility Name</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Facility Contact Phone</label>
                   <div className="relative">
                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Briefcase className="h-5 w-5 text-slate-400" /></div>
-                     <input type="text" required className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 outline-none text-slate-900 text-sm bg-slate-50" placeholder="e.g. Times Square Branch" />
+                     <input 
+                        type="tel" 
+                        required 
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 outline-none text-slate-900 text-sm bg-slate-50" 
+                        placeholder="+1 (555) 000-0000" 
+                      />
                   </div>
                </div>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Federal Corporate Tax ID (EIN)</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">Access Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><FileText className="h-5 w-5 text-slate-400" /></div>
-                <input type="text" required className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 outline-none text-slate-900 text-sm bg-slate-50" placeholder="XX-XXXXXXX" />
+                <input 
+                  type="password" 
+                  required 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 outline-none text-slate-900 text-sm bg-slate-50" 
+                  placeholder="••••••••" 
+                />
               </div>
             </div>
 
@@ -86,9 +144,13 @@ const DonorRegisterPage = () => {
             </div>
 
             <div className="pt-4 border-t border-slate-100 mt-8">
-              <Link to="/donor/dashboard" className="w-full flex justify-center items-center gap-2 py-3 border border-transparent rounded shadow-sm text-sm font-bold text-white bg-primary-700 hover:bg-primary-800 transition-colors uppercase tracking-widest">
-                 Generate Authorization Profile
-              </Link>
+              <button 
+                type="submit" 
+                disabled={isLoading}
+                className="w-full flex justify-center items-center gap-2 py-3 border border-transparent rounded shadow-sm text-sm font-bold text-white bg-primary-700 hover:bg-primary-800 transition-colors uppercase tracking-widest disabled:opacity-50"
+              >
+                 {isLoading ? <Loader2 className="animate-spin" size={18}/> : 'Generate Authorization Profile'}
+              </button>
             </div>
             
             <p className="mt-8 text-center text-sm text-slate-500 font-medium pb-12">

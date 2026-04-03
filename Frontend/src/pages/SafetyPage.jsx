@@ -57,6 +57,18 @@ const SafetyPage = () => {
                </p>
             </div>
          </div>
+
+         {/* Final CTA */}
+         <div className="mt-20 p-12 bg-white border border-slate-200 rounded shadow-sm text-center">
+            <h2 className="text-3xl font-bold font-serif text-slate-900 mb-6 font-primary-900">Is your cafeteria protocol secure?</h2>
+            <p className="text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed">
+               Download our comprehensive Safety SLA and Legal Indemnity Whitepaper to learn how our automated audit logs protect your institution.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+               <a href="/contact" className="btn-primary px-8 py-3">Consult Compliance Officer</a>
+               <a href="/donate" className="px-8 py-3 border border-slate-300 hover:bg-slate-50 transition-colors rounded font-bold text-sm tracking-widest uppercase text-slate-700">Explore Logic Framework</a>
+            </div>
+         </div>
       </div>
     </div>
   );

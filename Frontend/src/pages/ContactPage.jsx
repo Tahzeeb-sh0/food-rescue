@@ -1,14 +1,26 @@
 import React from 'react';
-import { Mail, Phone, MapPin, Send, Building, ShieldAlert } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Building, ShieldAlert, CheckCircle, Loader2 } from 'lucide-react';
 
 const ContactPage = () => {
-  return (
+   const [submitted, setSubmitted] = React.useState(false);
+   const [isSending, setIsSending] = React.useState(false);
+
+   const handleSubmit = (e) => {
+      e.preventDefault();
+      setIsSending(true);
+      setTimeout(() => {
+         setIsSending(false);
+         setSubmitted(true);
+      }, 1500);
+   };
+
+   return (
     <div className="bg-slate-50 min-h-screen pb-24">
       {/* Corporate Header */}
       <div className="bg-primary-900 py-20 border-b border-primary-800 text-center">
          <h1 className="text-4xl md:text-5xl font-bold font-serif text-white mb-6">Institutional Support & Inquiries</h1>
          <p className="text-primary-100 text-lg max-w-2xl mx-auto">
-           For corporate partnerships, media relations, or secure verification support, please direct your communication to the appropriate departmental endpoint.
+            For corporate partnerships, media relations, or secure verification support, please direct your communication to the appropriate departmental endpoint.
          </p>
       </div>
 
@@ -64,43 +76,54 @@ const ContactPage = () => {
          {/* Contact Form */}
          <div className="lg:col-span-2">
             <div className="structured-card bg-white p-8 sm:p-12">
-               <h2 className="text-2xl font-bold font-serif text-slate-900 mb-2">Submit Official Inquiry</h2>
-               <p className="text-slate-500 text-sm mb-8 pb-6 border-b border-slate-100">All submissions are strictly monitored. Average SLA for non-emergency tickets is 24 business hours.</p>
-
-               <form className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-6">
-                     <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Official Name / Representative</label>
-                        <input type="text" className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 outline-none text-slate-900 text-sm" placeholder="e.g. Jane Doe" />
-                     </div>
-                     <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-2">Corporate or NGO Email Address</label>
-                        <input type="email" className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 outline-none text-slate-900 text-sm" placeholder="director@organization.org" />
-                     </div>
+               {submitted ? (
+                  <div className="text-center py-20">
+                     <CheckCircle size={64} className="text-green-600 mx-auto mb-6" />
+                     <h2 className="text-3xl font-bold font-serif text-slate-900 mb-4">Transmission Successful</h2>
+                     <p className="text-slate-600 mb-8">Your inquiry has been logged into our departmental queue. Reference ID: {Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
+                     <button onClick={() => setSubmitted(false)} className="btn-primary px-8">Submit Another Inquiry</button>
                   </div>
+               ) : (
+                  <>
+                     <h2 className="text-2xl font-bold font-serif text-slate-900 mb-2">Submit Official Inquiry</h2>
+                     <p className="text-slate-500 text-sm mb-8 pb-6 border-b border-slate-100">All submissions are strictly monitored. Average SLA for non-emergency tickets is 24 business hours.</p>
 
-                  <div>
-                     <label className="block text-sm font-semibold text-slate-700 mb-2">Inquiry Classification</label>
-                     <select className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 outline-none text-slate-900 text-sm">
-                        <option>General Media/Press Inquiry</option>
-                        <option>Donor Platform Integration (API)</option>
-                        <option>NGO Registration Difficulty</option>
-                        <option>Report Logistical Infraction</option>
-                        <option>Financial/Grant Administration</option>
-                     </select>
-                  </div>
+                     <form className="space-y-6" onSubmit={handleSubmit}>
+                        <div className="grid md:grid-cols-2 gap-6">
+                           <div>
+                              <label className="block text-sm font-semibold text-slate-700 mb-2">Official Name / Representative</label>
+                              <input required type="text" className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 outline-none text-slate-900 text-sm" placeholder="e.g. Jane Doe" />
+                           </div>
+                           <div>
+                              <label className="block text-sm font-semibold text-slate-700 mb-2">Corporate or NGO Email Address</label>
+                              <input required type="email" className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 outline-none text-slate-900 text-sm" placeholder="director@organization.org" />
+                           </div>
+                        </div>
 
-                  <div>
-                     <label className="block text-sm font-semibold text-slate-700 mb-2">Message Payload</label>
-                     <textarea rows="6" className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 outline-none text-slate-900 text-sm resize-none" placeholder="Provide full context here. Do not include highly sensitive personal identifiers (PII) beyond standard operational data."></textarea>
-                  </div>
+                        <div>
+                           <label className="block text-sm font-semibold text-slate-700 mb-2">Inquiry Classification</label>
+                           <select className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 outline-none text-slate-900 text-sm">
+                              <option>General Media/Press Inquiry</option>
+                              <option>Donor Platform Integration (API)</option>
+                              <option>NGO Registration Difficulty</option>
+                              <option>Report Logistical Infraction</option>
+                              <option>Financial/Grant Administration</option>
+                           </select>
+                        </div>
 
-                  <div className="pt-4 border-t border-slate-100">
-                     <button type="button" className="btn-primary w-full md:w-auto px-8 gap-2 uppercase tracking-widest text-sm">
-                        <Send size={16} /> Transmit Inquiry
-                     </button>
-                  </div>
-               </form>
+                        <div>
+                           <label className="block text-sm font-semibold text-slate-700 mb-2">Message Payload</label>
+                           <textarea required rows="6" className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 outline-none text-slate-900 text-sm resize-none" placeholder="Provide full context here. Do not include highly sensitive personal identifiers (PII) beyond standard operational data."></textarea>
+                        </div>
+
+                        <div className="pt-4 border-t border-slate-100">
+                           <button type="submit" disabled={isSending} className="btn-primary w-full md:w-auto px-8 gap-2 uppercase tracking-widest text-sm flex items-center justify-center">
+                              {isSending ? <Loader2 className="animate-spin" size={16} /> : <><Send size={16} /> Transmit Inquiry</>}
+                           </button>
+                        </div>
+                     </form>
+                  </>
+               )}
             </div>
          </div>
       </div>

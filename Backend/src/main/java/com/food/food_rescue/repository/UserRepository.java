@@ -8,10 +8,12 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserRepository extends MongoRepository<User, String> {
     List<User> findByRole(Role role);
+    Optional<User> findByPhone(String phone);
     
     // Find NGOs near a given point within a certain distance
     List<User> findByRoleAndLocationNear(Role role, Point location, Distance distance);

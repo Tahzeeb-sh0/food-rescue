@@ -1,8 +1,24 @@
-import React from 'react';
-import { ShieldCheck, HeartPulse, Globe2, ArrowRight, FileText } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ShieldCheck, HeartPulse, Globe2, ArrowRight, FileText, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const ImpactPage = () => {
+  const [stats, setStats] = useState({ totalMeals: '12.5M', activeNgos: '8,400', co2DivertedTons: '45k' });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('http://localhost:8080/api/stats/impact')
+      .then(res => res.json())
+      .then(data => {
+        setStats({
+          totalMeals: data.totalMeals.toLocaleString(),
+          activeNgos: data.activeNgos.toLocaleString(),
+          co2DivertedTons: data.co2DivertedTons.toLocaleString() + 'T'
+        });
+      })
+      .catch(err => console.warn("Using fallback static stats for Impact Page."))
+      .finally(() => setIsLoading(false));
+  }, []);
   return (
     <div className="bg-slate-50 min-h-screen">
       {/* Hero Section - Solid Corporate Header */}
@@ -28,17 +44,23 @@ const ImpactPage = () => {
           <dl className="grid grid-cols-1 gap-12 sm:grid-cols-3 divide-y-2 sm:divide-y-0 sm:divide-x divide-slate-200">
             <div className="flex flex-col items-start justify-center text-left sm:pr-8">
               <dt className="text-sm font-semibold text-slate-500 uppercase tracking-widest mb-3">Meals Rescued</dt>
-              <dd className="text-5xl lg:text-6xl font-bold font-serif text-primary-700 mb-2">12.5M</dd>
+              <dd className="text-5xl lg:text-6xl font-bold font-serif text-primary-700 mb-2">
+                {isLoading ? <Loader2 className="animate-spin text-primary-200" size={40}/> : stats.totalMeals}
+              </dd>
               <span className="text-sm text-slate-400 font-medium border-t border-slate-100 pt-3 w-full">Independently Verified</span>
             </div>
             <div className="flex flex-col items-start justify-center text-left sm:px-8 pt-10 sm:pt-0">
               <dt className="text-sm font-semibold text-slate-500 uppercase tracking-widest mb-3">Active NGOs</dt>
-              <dd className="text-5xl lg:text-6xl font-bold font-serif text-slate-800 mb-2">8,400</dd>
+              <dd className="text-5xl lg:text-6xl font-bold font-serif text-slate-800 mb-2">
+                {isLoading ? <Loader2 className="animate-spin text-slate-200" size={40}/> : stats.activeNgos}
+              </dd>
               <span className="text-sm text-slate-400 font-medium border-t border-slate-100 pt-3 w-full">Across 42 Countries</span>
             </div>
             <div className="flex flex-col items-start justify-center text-left sm:pl-8 pt-10 sm:pt-0">
               <dt className="text-sm font-semibold text-slate-500 uppercase tracking-widest mb-3">CO2 Diverted</dt>
-              <dd className="text-5xl lg:text-6xl font-bold font-serif text-slate-800 mb-2">45k<span className="text-3xl">T</span></dd>
+              <dd className="text-5xl lg:text-6xl font-bold font-serif text-slate-800 mb-2">
+                {isLoading ? <Loader2 className="animate-spin text-slate-200" size={40}/> : stats.co2DivertedTons}
+              </dd>
               <span className="text-sm text-slate-400 font-medium border-t border-slate-100 pt-3 w-full">Methane Emissions Prevented</span>
             </div>
           </dl>
@@ -86,8 +108,8 @@ const ImpactPage = () => {
         <div className="mx-auto max-w-3xl px-6">
             <h2 className="text-3xl font-bold font-serif text-white mb-6">Establish a Corporate Partnership</h2>
             <p className="text-primary-200 mb-8 max-w-xl mx-auto">Engage your corporate social responsibility arm directly by integrating your cafeteria surplus with our API.</p>
-            <Link to="/ngo/register" className="btn-accent gap-2">
-               Begin Intake Process <ArrowRight size={18}/>
+            <Link to="/donor/register" className="btn-accent gap-2">
+               Partner With Us <ArrowRight size={18}/>
             </Link>
         </div>
       </div>

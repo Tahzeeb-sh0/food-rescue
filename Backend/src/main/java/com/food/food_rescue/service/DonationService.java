@@ -1,8 +1,9 @@
 package com.food.food_rescue.service;
 
+import com.food.food_rescue.model.User;
+import com.food.food_rescue.repository.UserRepository;
 import com.food.food_rescue.model.Donation;
 import com.food.food_rescue.model.DonationStatus;
-import com.food.food_rescue.model.Location;
 import com.food.food_rescue.repository.DonationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.geo.Distance;
@@ -13,13 +14,13 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class DonationService {
 
     private final DonationRepository donationRepository;
+    private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final NotificationService notificationService;
 
@@ -32,9 +33,15 @@ public class DonationService {
         // Notify nearby NGOs using WebSocket (Real-time UI)
         messagingTemplate.convertAndSend("/topic/donations/new", savedDonation);
         
-        // Trigger Push/SMS Notifications to nearby NGOs via Twilio/FCM mapping
-        // (In a real scenario, we would pull the nearby NGO list from UserRepository)
-        notificationService.sendPushAndSmsToNgos(savedDonation, java.util.List.of());
+        // Find NGOs within 10km to send SMS/Push
+        if (donation.getPickupLocation() != null) {
+            Point point = new Point(donation.getPickupLocation().getX(), donation.getPickupLocation().getY());
+            Distance distance = new Distance(10, Metrics.KILOMETERS);
+            List<User> nearbyNgos = userRepository.findByRoleAndLocationNear(com.food.food_rescue.model.Role.NGO, point, distance);
+            
+            // Trigger Push/SMS Notifications
+            notificationService.sendPushAndSmsToNgos(savedDonation, nearbyNgos);
+        }
 
         return savedDonation;
     }
@@ -58,10 +65,9 @@ public class DonationService {
         donation.setClaimedAt(LocalDateTime.now());
 
         // Optimistic locking handles the race condition here
-        // If two threads execute this simultaneously, the second one will throw OptimisticLockingFailureException
         Donation savedDonation = donationRepository.save(donation);
         
-        // Broadcast the claim status to `/topic/donations/claimed` so everyone's UI updates
+        // Broadcast the claim status
         messagingTemplate.convertAndSend("/topic/donations/claimed", savedDonation);
 
         return savedDonation;
@@ -75,11 +81,11 @@ public class DonationService {
             throw new RuntimeException("Donation is not in CLAIMED state");
         }
         
-        if (!donation.getClaimedByNgoId().equals(ngoId)) {
+        if (!ngoId.equals(donation.getClaimedByNgoId())) {
             throw new RuntimeException("Only the claiming NGO can complete the pickup");
         }
 
-        if (!donation.getConfirmationCode().equals(confirmationCode)) {
+        if (!confirmationCode.equals(donation.getConfirmationCode())) {
             throw new RuntimeException("Invalid confirmation code");
         }
 
@@ -92,8 +98,15 @@ public class DonationService {
         return savedDonation;
     }
 
+    public List<Donation> getDonationsByDonor(String donorId) {
+        return donationRepository.findByDonorId(donorId);
+    }
+
+    public List<Donation> getClaimsByNgo(String ngoId) {
+        return donationRepository.findByClaimedByNgoId(ngoId);
+    }
+
     private String generateConfirmationCode() {
-        // Generates a simple 6-digit code
         return String.format("%06d", (int)(Math.random() * 1000000));
     }
 }

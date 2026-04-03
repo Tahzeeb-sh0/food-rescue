@@ -89,7 +89,7 @@ const Header = () => {
             className="flex items-center gap-2 px-6 py-2 bg-accent-600 hover:bg-accent-700 text-white text-sm font-bold rounded shadow-sm transition-all duration-200 border border-transparent"
           >
             <Heart className="w-4 h-4" />
-            Log Surplus
+              Donate Food
           </Link>
         </div>
 
@@ -139,7 +139,7 @@ const Header = () => {
               className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-accent-600 hover:bg-accent-700 text-white font-bold rounded shadow-sm mt-3"
             >
               <Heart className="w-5 h-5" />
-              Log Surplus
+                Donate Food
             </Link>
           </div>
         </div>

@@ -47,6 +47,9 @@ h1, h2, h3, h4, .font-serif {
   .btn-accent {
     @apply inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-semibold rounded-md text-white bg-accent-600 hover:bg-accent-700 transition-colors shadow-sm;
   }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-semibold rounded-md text-white bg-primary-900 hover:bg-primary-950 transition-colors shadow-sm;
+  }
   .btn-outline {
     @apply inline-flex items-center justify-center px-6 py-3 border-2 border-primary-700 text-base font-semibold rounded-md text-primary-700 hover:bg-primary-50 transition-colors bg-white;
   }

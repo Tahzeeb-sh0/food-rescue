@@ -5,7 +5,7 @@ import HomePage from "../pages/HomePage";
 import RegisterPage from "../pages/RegisterPage";
 import LoginPage from "../pages/LoginPage";
 import ImpactPage from "../pages/ImpactPage";
-import HowItworksPage from "../pages/HowItworksPage";
+import HowItWorksPage from "../pages/HowItWorksPage";
 import PrivacyPolicyPage from "../pages/legal/PrivacyPolicyPage";
 import TermsOfServicePage from "../pages/legal/TermsOfServicePage";
 import CookiePolicyPage from "../pages/legal/CookiePolicyPage";
@@ -27,6 +27,11 @@ import BoardPage from "../pages/BoardPage";
 import PressPage from "../pages/PressPage";
 import SafetyPage from "../pages/SafetyPage";
 import ApiDocsPage from "../pages/ApiDocsPage";
+import ProfilePage from "../pages/ProfilePage";
+import SettingsPage from "../pages/SettingsPage";
+import CompliancePage from "../pages/CompliancePage";
+import ForgotPasswordPage from "../pages/ForgotPasswordPage";
+import ProtectedRoute from "../components/auth/ProtectedRoute";
 
 const Router = () => {
   return (
@@ -34,7 +39,7 @@ const Router = () => {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
-          <Route path="/howitworks" element={<HowItworksPage />} />
+          <Route path="/howitworks" element={<HowItWorksPage />} />
           <Route path="/impact" element={<ImpactPage />} />
           <Route path="/donate" element={<DonateLandingPage />} />
           
@@ -56,9 +61,41 @@ const Router = () => {
           <Route path="/ngo/login" element={<LoginPage />} />
           <Route path="/donor/login" element={<DonorLoginPage />} />
           <Route path="/donor/register" element={<DonorRegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           
-          <Route path="/ngo/dashboard" element={<NgoDashboard />} />
-          <Route path="/donor/dashboard" element={<DonorDashboard />} />          
+          <Route 
+            path="/ngo/dashboard" 
+            element={
+              <ProtectedRoute requiredRole="NGO">
+                <NgoDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/donor/dashboard" 
+            element={
+              <ProtectedRoute requiredRole="DONOR">
+                <DonorDashboard />
+              </ProtectedRoute>
+            } 
+          />          
+          <Route 
+            path="/profile" 
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/settings" 
+            element={
+              <ProtectedRoute>
+                <SettingsPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route path="/compliance" element={<CompliancePage />} />
 
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
           <Route path="/terms" element={<TermsOfServicePage />} />
