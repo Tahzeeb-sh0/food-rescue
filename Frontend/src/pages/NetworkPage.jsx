@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Network, 
   Search, 
-  Filter, 
   ShieldCheck, 
   Map as MapIcon, 
   MapPin, 
@@ -115,7 +114,7 @@ const NetworkPage = () => {
          {isLoading ? (
             <div className="py-32 flex flex-col items-center justify-center text-slate-400">
                <Loader2 className="w-12 h-12 animate-spin mb-4" />
-               <p className="font-medium">Fetching verified logistical nodes...</p>
+               <p className="font-medium">Loading NGO network...</p>
             </div>
          ) : viewMode === 'table' ? (
             <div className="structured-card overflow-hidden bg-white mb-12 border-slate-200 shadow-sm rounded-lg">
@@ -123,11 +122,11 @@ const NetworkPage = () => {
                   <table className="w-full text-left text-sm">
                      <thead className="bg-slate-50 border-b border-slate-200">
                         <tr>
-                           <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-widest text-[10px]">Organization Identifier</th>
-                           <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-widest text-[10px]">Operational Paradigm</th>
-                           <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-widest text-[10px]">Primary Sector</th>
-                           <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-widest text-[10px]">Throughput Cap</th>
-                           <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-widest text-[10px] text-right">Clearance Status</th>
+                           <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-widest text-[10px]">Organization</th>
+                           <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-widest text-[10px]">Type</th>
+                           <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-widest text-[10px]">Location</th>
+                           <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-widest text-[10px]">Capacity</th>
+                           <th className="px-6 py-4 font-bold text-slate-500 uppercase tracking-widest text-[10px] text-right">Status</th>
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-slate-100">
@@ -151,7 +150,7 @@ const NetworkPage = () => {
                           <tr>
                              <td colSpan="5" className="px-6 py-20 text-center">
                                 <Info className="mx-auto w-12 h-12 text-slate-200 mb-4" />
-                                <p className="text-slate-500 font-medium">No logistical nodes matching your query were found.</p>
+                                <p className="text-slate-500 font-medium">No NGOs match your search.</p>
                                 <button onClick={() => setSearchQuery('')} className="text-primary-700 font-bold mt-2 hover:underline">Reset Search</button>
                              </td>
                           </tr>
@@ -198,13 +197,13 @@ const NetworkPage = () => {
                   <div className="w-16 h-16 bg-primary-100 text-primary-700 rounded-full flex items-center justify-center mx-auto mb-6">
                      <MapIcon size={32} />
                   </div>
-                  <h3 className="text-2xl font-bold font-serif text-slate-900 mb-4">Tactical Grid Map</h3>
+                  <h3 className="text-2xl font-bold font-serif text-slate-900 mb-4">Map View</h3>
                   <p className="text-slate-600 mb-6 leading-relaxed">
-                     The interactive GIS mapping layer requires a verified session token with advanced clearance. Your current organizational status is restricted to directory access.
+                     The interactive map is available to verified members. Sign in or register to access it.
                   </p>
                   <div className="flex flex-col gap-3">
-                     <a href="/ngo/register" className="btn-primary w-full py-2.5 text-sm uppercase tracking-widest">Upgrade Clearance</a>
-                     <button onClick={() => setViewMode('table')} className="text-slate-500 font-bold hover:text-slate-700 text-sm">Return to Data Table</button>
+                     <a href="/ngo/register" className="btn-primary w-full py-2.5 text-sm uppercase tracking-widest">Register to Unlock</a>
+                     <button onClick={() => setViewMode('table')} className="text-slate-500 font-bold hover:text-slate-700 text-sm">Back to Table</button>
                   </div>
                </div>
                <div className="absolute top-1/4 left-1/3 text-primary-700 animate-bounce"><MapPin size={24} /></div>

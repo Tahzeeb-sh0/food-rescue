@@ -7,24 +7,24 @@ const HelpCenterPage = () => {
 
   const faqs = [
     {
-       q: "What qualifies as 'viable surplus food'?",
-       a: "Viable surplus food includes any unserved, safely stored catered food, bakery goods, or intact agricultural produce. We cannot accept half-eaten buffet items, food left at improper temperatures for >2 hours, or expired perishables. Strict adherence to local health codes is mandatory."
+       q: "What qualifies as viable surplus food?",
+       a: "Viable surplus includes unserved catered food, bakery goods, and intact produce. We cannot accept food left at unsafe temperatures for over 2 hours, half-eaten items, or expired perishables. All donations must comply with local health codes."
     },
     {
-       q: "How does the matching algorithm select an NGO?",
-       a: "Our proprietary dispatch engine utilizes a multi-variable calculation incorporating Euclidean distance (capped at 10km), the NGO's declared transit capacity, and the specific dietary tags of the payload. The first verified NGO to successfully 'lock' the claim via WebSocket secures the batch."
+       q: "How does the platform match a donation to an NGO?",
+       a: "When a donation is posted, nearby verified NGOs within 10km are notified in real time. The first NGO to claim the donation secures it. Our system factors in distance and NGO capacity to ensure a good match."
     },
     {
-       q: "What if the claiming NGO fails to arrive?",
-       a: "NGOs are subjected to strict SLAs (Service Level Agreements). If an NGO fails to arrive within the donor's specified operational window, the batch is automatically un-locked and re-broadcasted to the network. The failing NGO incurs a strike against their credibility score."
+       q: "What happens if the NGO doesn't show up?",
+       a: "NGOs are expected to arrive within the donor's specified window. If they don't, the donation is released back to the network for other NGOs to claim. Repeated no-shows affect the NGO's standing on the platform."
     },
     {
-       q: "How is the 6-Digit authorization code utilized?",
-       a: "The authorization code acts as an unbreakable chain-of-custody link. The donor's portal generates the code upon a successful claim. When the physical NGO agent arrives, they must input this code into their portal to finalize the operational handshake and trigger the generation of tax documents."
+       q: "How does the 6-digit confirmation code work?",
+       a: "When an NGO claims a donation, the donor receives a 6-digit code. At pickup, the NGO enters this code to confirm the handover. This creates a verified record of the transfer and triggers any tax documentation."
     },
     {
-       q: "Can individuals claim food directly through the platform?",
-       a: "No. The Global Food Rescue Initiative operates strictly as a B2B logistics bridge between corporate entities and state-verified 501(c)(3) organizations. Individual relief must be sought directly through your local municipal pantry network."
+       q: "Can individuals claim food directly?",
+       a: "No. The platform connects businesses with verified NGOs and charities only. If you need food assistance, please contact your local food bank or community pantry."
     }
   ];
 
@@ -32,12 +32,12 @@ const HelpCenterPage = () => {
     <div className="bg-slate-50 min-h-screen pb-24">
        {/* Hero Search Area */}
        <div className="bg-primary-900 border-b border-primary-800 text-white py-24 px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold font-serif mb-6">Operational Knowledge Base</h1>
-          <p className="text-primary-100 text-lg mb-10 max-w-2xl mx-auto">Access standard operating procedures, compliance documentation, and system navigation guidelines.</p>
+          <h1 className="text-4xl md:text-5xl font-bold font-serif mb-6">Help Center</h1>
+          <p className="text-primary-100 text-lg mb-10 max-w-2xl mx-auto">Find answers to common questions about donating food, claiming donations, and using the platform.</p>
           
           <div className="max-w-xl mx-auto relative">
              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-             <input type="text" placeholder="Query the documentation (e.g., 'Tax deductions')" className="w-full pl-12 pr-4 py-4 rounded bg-white text-slate-900 text-lg shadow-xl outline-none focus:ring-4 ring-primary-500/30 transition-shadow" />
+             <input type="text" placeholder="Search for help (e.g. 'how to donate')" className="w-full pl-12 pr-4 py-4 rounded bg-white text-slate-900 text-lg shadow-xl outline-none focus:ring-4 ring-primary-500/30 transition-shadow" />
           </div>
        </div>
 
@@ -46,16 +46,16 @@ const HelpCenterPage = () => {
           <div className="lg:col-span-1 space-y-6">
              <div className="structured-card p-6 border-l-4 border-l-primary-700 bg-white">
                 <BookOpen className="w-6 h-6 text-primary-700 mb-4" />
-                <h3 className="font-bold text-slate-900 mb-2">Platform Tutorials</h3>
-                <p className="text-sm text-slate-600 mb-4">Step-by-step PDF guides for first-time NGOs and Donors.</p>
-                <Link to="#" className="text-primary-700 font-semibold text-sm hover:underline">Download Guides Library</Link>
+                <h3 className="font-bold text-slate-900 mb-2">Guides & Tutorials</h3>
+                <p className="text-sm text-slate-600 mb-4">Step-by-step guides for first-time NGOs and donors.</p>
+                <Link to="#" className="text-primary-700 font-semibold text-sm hover:underline">Download Guides</Link>
              </div>
              
              <div className="structured-card p-6 border-l-4 border-l-accent-600 bg-white">
                 <AlertCircle className="w-6 h-6 text-accent-600 mb-4" />
-                <h3 className="font-bold text-slate-900 mb-2">Submit Support Ticket</h3>
-                <p className="text-sm text-slate-600 mb-4">Encountered an anomaly in the dispatch system? Contact engineering directly.</p>
-                <Link to="/contact" className="text-primary-700 font-semibold text-sm hover:underline">Open Jira Ticket →</Link>
+                <h3 className="font-bold text-slate-900 mb-2">Contact Support</h3>
+                <p className="text-sm text-slate-600 mb-4">Having trouble? Reach out to our support team directly.</p>
+                <Link to="/contact" className="text-primary-700 font-semibold text-sm hover:underline">Get in Touch →</Link>
              </div>
           </div>
 
@@ -84,7 +84,7 @@ const HelpCenterPage = () => {
              </div>
              
              <div className="mt-10 text-center text-sm font-medium text-slate-500">
-                Data point untouched? <Link to="/contact" className="text-primary-700 hover:underline">Escalate to a human representative.</Link>
+                Still need help? <Link to="/contact" className="text-primary-700 hover:underline">Contact our support team.</Link>
              </div>
           </div>
        </div>

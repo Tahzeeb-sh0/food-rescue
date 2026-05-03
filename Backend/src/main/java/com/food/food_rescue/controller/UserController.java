@@ -1,12 +1,20 @@
 package com.food.food_rescue.controller;
 
+import com.food.food_rescue.dto.ChangePasswordRequest;
 import com.food.food_rescue.dto.LoginRequest;
+import com.food.food_rescue.dto.ResetPasswordRequest;
+import com.food.food_rescue.dto.UpdateProfileRequest;
 import com.food.food_rescue.dto.UserRegistrationRequest;
+import com.food.food_rescue.dto.UserResponse;
 import com.food.food_rescue.model.User;
 import com.food.food_rescue.repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,55 +22,95 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
 public class UserController {
 
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
+
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @GetMapping("/ngos")
-    public ResponseEntity<List<User>> getAllNgos() {
-        return ResponseEntity.ok(userRepository.findByRole(com.food.food_rescue.model.Role.NGO));
+    public ResponseEntity<List<UserResponse>> getAllNgos() {
+        List<UserResponse> ngos = userRepository.findByRole(com.food.food_rescue.model.Role.NGO)
+                .stream().map(UserResponse::from).toList();
+        return ResponseEntity.ok(ngos);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody UserRegistrationRequest request) {
+    public ResponseEntity<?> register(@Valid @RequestBody UserRegistrationRequest request) {
+        if (userRepository.findByPhone(request.getPhone()).isPresent()) {
+            return ResponseEntity.badRequest().body("Phone number already registered.");
+        }
+
         GeoJsonPoint point = new GeoJsonPoint(request.getLongitude(), request.getLatitude());
 
         User user = User.builder()
                 .name(request.getName())
                 .phone(request.getPhone())
-                .password(request.getPassword())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
                 .location(point)
                 .build();
 
-        return ResponseEntity.ok(userRepository.save(user));
+        User saved = userRepository.save(user);
+        log.info("New user registered: role={}", saved.getRole());
+        return ResponseEntity.ok(UserResponse.from(saved));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<User> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         return userRepository.findByPhone(request.getPhone())
-                .filter(u -> u.getPassword().equals(request.getPassword()))
-                .map(ResponseEntity::ok)
+                .filter(u -> passwordEncoder.matches(request.getPassword(), u.getPassword()))
+                .map(u -> ResponseEntity.ok(UserResponse.from(u)))
                 .orElse(ResponseEntity.status(401).build());
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> updateProfile(@PathVariable String id,
+                                           @Valid @RequestBody UpdateProfileRequest request) {
+        return userRepository.findById(id)
+                .map(u -> {
+                    u.setName(request.getName());
+                    userRepository.save(u);
+                    return (ResponseEntity<?>) ResponseEntity.ok(UserResponse.from(u));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("/{id}/password")
+    public ResponseEntity<String> changePassword(@PathVariable String id,
+                                                  @Valid @RequestBody ChangePasswordRequest request) {
+        return userRepository.findById(id)
+                .map(u -> {
+                    if (!passwordEncoder.matches(request.getCurrentPassword(), u.getPassword())) {
+                        return ResponseEntity.status(401).<String>body("Current password is incorrect.");
+                    }
+                    u.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                    userRepository.save(u);
+                    log.info("Password changed for user id={}", id);
+                    return ResponseEntity.ok("Password updated successfully.");
+                })
+                .orElse(ResponseEntity.status(404).<String>body("User not found."));
+    }
+
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestBody LoginRequest request) {
-        // Mock: In a real app, send OTP/Email here
-        return userRepository.findByPhone(request.getPhone())
-                .map(u -> ResponseEntity.ok("OTP sent to verified phone number."))
-                .orElse(ResponseEntity.status(404).body("Organization not found."));
+    public ResponseEntity<String> forgotPassword(@Valid @RequestBody LoginRequest request) {
+        // Always return the same message to prevent phone enumeration
+        userRepository.findByPhone(request.getPhone()).ifPresent(u ->
+            log.info("Password reset requested for user id={}", u.getId())
+            // TODO: send OTP via SMS when Twilio is configured
+        );
+        return ResponseEntity.ok("If that phone number is registered, an OTP has been sent.");
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestBody UserRegistrationRequest request) {
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         return userRepository.findByPhone(request.getPhone())
                 .map(u -> {
-                    u.setPassword(request.getPassword());
+                    u.setPassword(passwordEncoder.encode(request.getNewPassword()));
                     userRepository.save(u);
                     return ResponseEntity.ok("Password updated successfully.");
                 })
-                .orElse(ResponseEntity.status(404).body("User not found."));
+                .orElse(ResponseEntity.status(404).<String>body("User not found."));
     }
 }

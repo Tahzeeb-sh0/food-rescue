@@ -7,7 +7,7 @@ const PrivacyPolicyPage = () => {
     <div className="min-h-screen bg-slate-50 py-20 px-6 lg:px-8 border-b border-primary-900 border-b-8">
       <div className="max-w-4xl mx-auto structured-card p-10 sm:p-16">
          <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-primary-700 hover:text-primary-800 mb-10 transition-colors uppercase tracking-widest">
-            <ArrowLeft size={16} /> Return to Operations
+            <ArrowLeft size={16} /> Back to Home
          </Link>
          
          <div className="flex items-start gap-5 mb-12 pb-8 border-b border-slate-200">

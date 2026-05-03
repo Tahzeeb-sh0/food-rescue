@@ -4,10 +4,10 @@ import com.food.food_rescue.dto.ClaimRequest;
 import com.food.food_rescue.dto.CompleteRequest;
 import com.food.food_rescue.dto.DonationRequest;
 import com.food.food_rescue.model.Donation;
-import com.food.food_rescue.model.DonationStatus;
-import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import com.food.food_rescue.service.DonationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,27 +16,28 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/donations")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173") // Allow Vite frontend
 public class DonationController {
 
     private final DonationService donationService;
 
     @PostMapping
-    public ResponseEntity<?> createDonation(@RequestBody DonationRequest request) {
-        System.out.println("--> Receiving Donation: " + request.getTitle() + " (Donor: " + request.getDonorId() + ")");
-        try {
-            Donation donation = Donation.builder()
-                    .donorId(request.getDonorId())
-                    .title(request.getTitle())
-                    .photoUrl(request.getPhotoUrl())
-                    .capacity(request.getCapacity())
-                    .pickupLocation(new GeoJsonPoint(request.getLongitude(), request.getLatitude()))
-                    .build();
-            return ResponseEntity.ok(donationService.createDonation(donation));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("Creation Failed: " + e.getMessage());
-        }
+    public ResponseEntity<Donation> createDonation(@Valid @RequestBody DonationRequest request) {
+        Donation donation = Donation.builder()
+                .donorId(request.getDonorId())
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .photoUrl(request.getPhotoUrl())
+                .capacity(request.getCapacity())
+                .pickupLocation(new GeoJsonPoint(request.getLongitude(), request.getLatitude()))
+                .build();
+        return ResponseEntity.ok(donationService.createDonation(donation));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Donation> getDonationById(@PathVariable String id) {
+        return donationService.getDonationById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/nearby")
@@ -48,23 +49,15 @@ public class DonationController {
     }
 
     @PostMapping("/{id}/claim")
-    public ResponseEntity<Donation> claimDonation(@PathVariable String id, @RequestBody ClaimRequest request) {
-        try {
-            Donation claimedDonation = donationService.claimDonation(id, request.getNgoId());
-            return ResponseEntity.ok(claimedDonation);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null); // Simple error handling wrapper for now
-        }
+    public ResponseEntity<Donation> claimDonation(@PathVariable String id,
+                                                   @Valid @RequestBody ClaimRequest request) {
+        return ResponseEntity.ok(donationService.claimDonation(id, request.getNgoId()));
     }
 
     @PostMapping("/{id}/complete")
-    public ResponseEntity<Donation> completePickup(@PathVariable String id, @RequestBody CompleteRequest request) {
-        try {
-            Donation completedDonation = donationService.completePickup(id, request.getNgoId(), request.getConfirmationCode());
-            return ResponseEntity.ok(completedDonation);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null);
-        }
+    public ResponseEntity<Donation> completePickup(@PathVariable String id,
+                                                    @Valid @RequestBody CompleteRequest request) {
+        return ResponseEntity.ok(donationService.completePickup(id, request.getNgoId(), request.getConfirmationCode()));
     }
 
     @GetMapping("/donor/{donorId}")
@@ -75,5 +68,12 @@ public class DonationController {
     @GetMapping("/ngo/{ngoId}")
     public ResponseEntity<List<Donation>> getClaimsByNgo(@PathVariable String ngoId) {
         return ResponseEntity.ok(donationService.getClaimsByNgo(ngoId));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> cancelDonation(@PathVariable String id,
+                                               @RequestParam String donorId) {
+        donationService.cancelDonation(id, donorId);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -84,10 +84,10 @@ const MapView = ({ donations = [], type = 'NGO' }) => {
       <div className="absolute bottom-10 left-10 z-20 bg-slate-900/60 backdrop-blur-xl p-6 rounded-3xl border border-white/10 max-w-xs shadow-2xl">
          <div className="flex items-center gap-3 mb-3">
             <div className="p-1.5 bg-primary-500/20 rounded-lg"><Zap size={16} className="text-primary-400 animate-pulse" /></div>
-            <h4 className="text-xs font-bold text-white uppercase tracking-widest">Sector Telemetry</h4>
+            <h4 className="text-xs font-bold text-white uppercase tracking-widest">Nearby Activity</h4>
          </div>
          <p className="text-xs text-slate-400 font-medium leading-relaxed">
-           Displaying {dots.length} verified {type === 'DONOR' ? 'distribution nodes' : 'active surplus alerts'} within your 5km operational radius.
+           Showing {dots.length} verified {type === 'DONOR' ? 'NGO partners' : 'food donations'} within 5km.
          </p>
       </div>
     </div>

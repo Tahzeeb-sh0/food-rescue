@@ -14,7 +14,8 @@ import java.util.Optional;
 public interface UserRepository extends MongoRepository<User, String> {
     List<User> findByRole(Role role);
     Optional<User> findByPhone(String phone);
-    
+    long countByRole(Role role);
+
     // Find NGOs near a given point within a certain distance
     List<User> findByRoleAndLocationNear(Role role, Point location, Distance distance);
 }

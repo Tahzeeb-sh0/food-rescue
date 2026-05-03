@@ -16,25 +16,22 @@ public class StatsService {
     private final UserRepository userRepository;
 
     public ImpactStats getImpactStats() {
-        long completedDonations = donationRepository.findAll().stream()
-                .filter(d -> d.getStatus() == DonationStatus.COMPLETED)
-                .count();
+        // Use count query instead of loading all documents into memory
+        long totalMeals = 0;
+        Long sumResult = donationRepository.sumCapacityByStatus(DonationStatus.COMPLETED.name());
+        if (sumResult != null) {
+            totalMeals = sumResult;
+        }
 
-        // Assume each donation capacity represents meals
-        long totalMeals = donationRepository.findAll().stream()
-                .filter(d -> d.getStatus() == DonationStatus.COMPLETED)
-                .mapToLong(d -> d.getCapacity())
-                .sum();
+        long activeNgos = userRepository.countByRole(Role.NGO);
 
-        long activeNgos = userRepository.findByRole(Role.NGO).size();
-
-        // 1 ton of CO2 is roughly diverted per 500 meals (simplified metric for NGO context)
-        double co2DivertedTons = (totalMeals / 500.0);
+        // ~0.5 kg CO2 saved per meal diverted from landfill (WRAP estimate)
+        double co2DivertedTons = totalMeals * 0.5 / 1000.0;
 
         return ImpactStats.builder()
                 .totalMeals(totalMeals)
                 .activeNgos(activeNgos)
-                .co2DivertedTons(Math.round(co2DivertedTons * 10.0) / 10.0) // 1 decimal place
+                .co2DivertedTons(Math.round(co2DivertedTons * 10.0) / 10.0)
                 .build();
     }
 }

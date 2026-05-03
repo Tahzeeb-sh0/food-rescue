@@ -13,17 +13,17 @@ const DonateLandingPage = () => {
                  <ShieldCheck size={16}/> Corporate Partnership Intake
                </div>
                <h1 className="text-5xl lg:text-6xl font-bold font-serif mb-6 leading-tight">
-                 Elevate your CSR through <span className="text-primary-300">verified zero-waste logstics.</span>
+                 Elevate your CSR through <span className="text-primary-300">verified zero-waste logistics.</span>
                </h1>
                <p className="text-xl text-primary-200 leading-relaxed mb-10">
                  Convert your cafeteria and event surplus into verified humanitarian impact. Our API securely matches your location to 501(c)(3) relief organizations within 15 minutes.
                </p>
                <div className="flex flex-col sm:flex-row gap-4">
                  <Link to="/donor/register" className="btn-accent px-8 py-4 text-center">
-                    Initiate Facility Registration
+                    Register as a Donor
                  </Link>
                  <Link to="/contact" className="btn-outline text-white border-primary-700 hover:bg-primary-900 bg-transparent text-center px-8 py-4">
-                    Consult our Enterprise Team
+                    Talk to Our Team
                  </Link>
                </div>
             </div>
@@ -75,7 +75,7 @@ const DonateLandingPage = () => {
          <div className="bg-primary-900 rounded p-12 text-center text-white border border-primary-800 shadow-sm relative overflow-hidden">
              <div className="relative z-10 max-w-2xl mx-auto">
                 <h3 className="text-3xl font-bold font-serif mb-6">Ready to secure your cafeteria logistics?</h3>
-                <Link to="/donor/register" className="btn-accent px-8">Launch Operations Portal <ArrowRight size={18} className="ml-2"/></Link>
+                <Link to="/donor/register" className="btn-accent px-8">Get Started <ArrowRight size={18} className="ml-2"/></Link>
              </div>
          </div>
       </div>

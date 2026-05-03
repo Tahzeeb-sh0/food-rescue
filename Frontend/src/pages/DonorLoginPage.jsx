@@ -6,11 +6,13 @@ const DonorLoginPage = () => {
   const [phone, setPhone] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     try {
       const res = await fetch('http://localhost:8080/api/users/login', {
         method: 'POST',
@@ -22,11 +24,10 @@ const DonorLoginPage = () => {
         localStorage.setItem('user', JSON.stringify(user));
         navigate('/donor/dashboard');
       } else {
-        alert('Invalid credentials.');
+        setError('Invalid phone number or password.');
       }
-    } catch (err) {
-      console.warn("Backend offline. Bypassing auth for demo.");
-      navigate('/donor/dashboard');
+    } catch {
+      setError('Could not connect to server. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -39,22 +40,22 @@ const DonorLoginPage = () => {
       <div className="flex-1 flex flex-col justify-center py-12 px-6 sm:px-12 lg:px-20 xl:px-24">
         <div className="mx-auto w-full max-w-md">
           <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-primary-700 hover:text-primary-800 mb-10 transition-colors uppercase tracking-widest">
-            <ArrowLeft size={16} /> Return to Operations
+            <ArrowLeft size={16} /> Back to Home
           </Link>
           
           <div className="mb-10">
-            <h2 className="text-3xl font-bold font-serif text-slate-900 mb-2">Corporate Donor Access</h2>
+            <h2 className="text-3xl font-bold font-serif text-slate-900 mb-2">Donor Sign In</h2>
             <p className="text-slate-600 font-medium">
-              Access your facility dashboard. Not an enterprise donor?{' '}
+              Access your dashboard. Not a donor yet?{' '}
               <Link to="/donor/register" className="text-accent-600 hover:text-accent-700 font-bold underline underline-offset-4 tracking-wide">
-                Initiate onboarding
+                Create an account
               </Link>.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-lg shadow-sm border border-slate-200">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Facility / Corporate Phone</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Phone Number</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Building2 className="h-5 w-5 text-slate-400" />
@@ -71,7 +72,7 @@ const DonorLoginPage = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Access Credential</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-slate-400" />
@@ -94,14 +95,8 @@ const DonorLoginPage = () => {
               <div className="flex items-center">
                 <input id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 text-primary-600 border-slate-300 rounded" />
                 <label htmlFor="remember-me" className="ml-2 block text-sm font-medium text-slate-600">
-                  Save hardware token
+                  Remember me
                 </label>
-              </div>
-
-              <div className="text-sm">
-                <a href="#" className="font-semibold text-primary-700 hover:text-primary-800">
-                  Reset Credentials
-                </a>
               </div>
             </div>
 
@@ -111,9 +106,10 @@ const DonorLoginPage = () => {
                 disabled={isLoading}
                 className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded text-sm font-bold text-white bg-primary-700 hover:bg-primary-800 transition-colors disabled:opacity-50"
               >
-                {isLoading ? <Loader2 className="animate-spin" size={18}/> : <><LogIn className="w-4 h-4" /> Authenticate Terminal</>}
+                {isLoading ? <Loader2 className="animate-spin" size={18}/> : <><LogIn className="w-4 h-4" /> Sign In</>}
               </button>
             </div>
+            {error && <p className="text-sm text-red-600 text-center">{error}</p>}
           </form>
         </div>
       </div>

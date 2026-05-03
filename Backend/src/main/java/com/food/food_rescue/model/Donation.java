@@ -24,6 +24,7 @@ public class Donation {
     private String donorId;
     
     private String title;
+    private String description; // Optional additional details
     private String photoUrl;
     private int capacity; // e.g., "100 people"
     

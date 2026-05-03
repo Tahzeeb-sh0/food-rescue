@@ -14,7 +14,7 @@ const PressPage = () => {
   return (
     <div className="bg-slate-50 min-h-screen pb-24">
       {/* Corporate Header */}
-      <div className="bg-primary-950 py-24 pb-32 border-b-8 border-primary-900 border-b-8">
+      <div className="bg-primary-950 py-24 pb-32 border-b-8 border-primary-900">
          <div className="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col items-center text-center">
             <Rss className="w-12 h-12 text-primary-400 mb-6"/>
             <h1 className="text-5xl font-bold font-serif text-white mb-6">Press & Media Relations</h1>

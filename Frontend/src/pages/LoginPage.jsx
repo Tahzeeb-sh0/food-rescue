@@ -6,11 +6,13 @@ const LoginPage = () => {
   const [phone, setPhone] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     try {
       const res = await fetch('http://localhost:8080/api/users/login', {
         method: 'POST',
@@ -22,11 +24,10 @@ const LoginPage = () => {
         localStorage.setItem('user', JSON.stringify(user));
         navigate('/ngo/dashboard');
       } else {
-        alert('Invalid credentials.');
+        setError('Invalid phone number or password.');
       }
-    } catch (err) {
-      console.warn("Backend offline. Bypassing auth for demo.");
-      navigate('/ngo/dashboard');
+    } catch {
+      setError('Could not connect to server. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -43,11 +44,11 @@ const LoginPage = () => {
           </Link>
           
           <div className="mb-10">
-            <h2 className="text-3xl font-bold font-serif text-slate-900 mb-2">NGO Portal Login</h2>
+            <h2 className="text-3xl font-bold font-serif text-slate-900 mb-2">NGO Sign In</h2>
             <p className="text-slate-600 font-medium">
-              Access your dashboard to orchestrate food rescues. Need an account?{' '}
+              Access your dashboard. Need an account?{' '}
               <Link to="/ngo/register" className="text-primary-700 hover:text-primary-800 font-semibold underline underline-offset-4">
-                Apply for registration
+                Register here
               </Link>.
             </p>
           </div>
@@ -90,18 +91,12 @@ const LoginPage = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center">
               <div className="flex items-center">
                 <input id="remember-me" name="remember-me" type="checkbox" className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-slate-300 rounded cursor-pointer" />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-600">
                   Remember this device
                 </label>
-              </div>
-
-              <div className="text-sm">
-                <a href="#" className="font-semibold text-primary-700 hover:text-primary-800">
-                  Forgot your password?
-                </a>
               </div>
             </div>
 
@@ -114,9 +109,10 @@ const LoginPage = () => {
                 {isLoading ? <Loader2 className="animate-spin" size={18}/> : <><LogIn className="w-4 h-4" /> Sign In to Portal</>}
               </button>
             </div>
+            {error && <p className="text-sm text-red-600 text-center">{error}</p>}
             
             <div className="pt-4 border-t border-slate-100 flex flex-col items-center">
-              <span className="text-xs text-slate-500 text-center uppercase tracking-widest font-semibold mb-4">Authorized Access Only</span>
+              <span className="text-xs text-slate-400 text-center">NGO accounts only. Donors sign in <Link to="/donor/login" className="text-primary-700 hover:underline">here</Link>.</span>
             </div>
           </form>
           

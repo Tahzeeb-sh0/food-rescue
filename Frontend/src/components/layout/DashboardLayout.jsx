@@ -14,8 +14,8 @@ const DashboardLayout = ({ children, role }) => {
   }, []);
 
   const menuItems = [
-    { icon: <LayoutDashboard size={20} />, label: 'Command Center', path: role === 'NGO' ? '/ngo/dashboard' : '/donor/dashboard' },
-    { icon: <Heart size={20} />, label: role === 'NGO' ? 'Available Surplus' : 'Donate Food', path: role === 'NGO' ? '/ngo/dashboard' : '/donor/dashboard' },
+    { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: role === 'NGO' ? '/ngo/dashboard' : '/donor/dashboard' },
+    { icon: <Heart size={20} />, label: role === 'NGO' ? 'Available Food' : 'Donate Food', path: role === 'NGO' ? '/ngo/dashboard' : '/donor/dashboard' },
     { icon: <Globe size={20} />, label: 'Impact Data', path: '/impact' },
     { icon: <User size={20} />, label: 'Organization Profile', path: '/profile' },
     { icon: <Settings size={20} />, label: 'Settings', path: '/settings' },
@@ -127,7 +127,7 @@ const DashboardLayout = ({ children, role }) => {
             className="flex items-center justify-center px-4 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-widest hover:text-red-600 hover:bg-red-50/50 transition-all w-full rounded-xl border border-transparent hover:border-red-100"
           >
             <LogOut size={16} className="mr-3" />
-            De-authenticate Terminal
+            Sign Out
           </button>
         </div>
       </aside>
@@ -145,12 +145,13 @@ const DashboardLayout = ({ children, role }) => {
             <div>
                <div className="flex items-center gap-2 mb-1">
                   <h2 className="text-xl font-serif font-bold tracking-tight text-slate-900 group">
-                    {location.pathname.includes('profile') ? 'Entity Identity' : 
-                     location.pathname.includes('impact') ? 'Network Ledger' : 
-                     'Operations Terminal'}
+                    {location.pathname.includes('profile') ? 'My Profile' : 
+                     location.pathname.includes('impact') ? 'Impact Dashboard' : 
+                     location.pathname.includes('settings') ? 'Settings' :
+                     'Dashboard'}
                   </h2>
                </div>
-               <p className="text-[10px] font-bold text-slate-400 font-medium uppercase tracking-[0.2em]">Authorized Sector Coverage • Verified Session</p>
+               <p className="text-[10px] font-bold text-slate-400 font-medium uppercase tracking-[0.2em]">Verified Session Active</p>
             </div>
           </div>
           

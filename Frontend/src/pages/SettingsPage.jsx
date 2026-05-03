@@ -1,41 +1,89 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../components/layout/DashboardLayout';
-import { 
-  Bell, 
-  Lock, 
-  Shield, 
-  Mail, 
-  Smartphone, 
-  Eye, 
-  EyeOff, 
-  Save, 
-  Loader2, 
-  CheckCircle,
-  AlertTriangle,
-  Globe,
-  Settings
-} from 'lucide-react';
+import { Bell, Lock, Shield, Mail, Eye, EyeOff, Save, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
+
+const API = 'http://localhost:8080';
+
+const DEFAULT_NOTIFICATIONS = [
+  { id: 'new_donations', label: 'New Food Alerts', active: true, desc: 'Get notified when new food is available within 10km.' },
+  { id: 'claim_updates', label: 'Pickup Notifications', active: true, desc: 'Alerts when a confirmation code is requested during a handover.' },
+  { id: 'impact_benchmarks', label: 'Monthly Impact Summary', active: false, desc: "A monthly summary of your organization's environmental impact." },
+  { id: 'system_status', label: 'System Status', active: true, desc: 'Critical alerts about platform maintenance or downtime.' },
+];
 
 const SettingsPage = () => {
   const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('security'); // 'security' or 'notifications'
-  const [showPassword, setShowPassword] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
+  const [activeTab, setActiveTab] = useState('security');
+
+  // Password form
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [pwLoading, setPwLoading] = useState(false);
+  const [pwSaved, setPwSaved] = useState(false);
+  const [pwError, setPwError] = useState('');
+
+  // Notification prefs
+  const [notifications, setNotifications] = useState(DEFAULT_NOTIFICATIONS);
+  const [notifLoading, setNotifLoading] = useState(false);
+  const [notifSaved, setNotifSaved] = useState(false);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) setUser(JSON.parse(savedUser));
+    const saved = localStorage.getItem('user');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setUser(parsed);
+      // Load saved notification prefs from localStorage
+      const savedNotifs = localStorage.getItem(`notifs_${parsed.id}`);
+      if (savedNotifs) setNotifications(JSON.parse(savedNotifs));
+    }
   }, []);
 
-  const handleSave = (e) => {
+  const handlePasswordSave = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    setPwError('');
+    if (newPassword.length < 8) {
+      setPwError('New password must be at least 8 characters.');
+      return;
+    }
+    setPwLoading(true);
+    try {
+      const res = await fetch(`${API}/api/users/${user.id}/password`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      if (res.ok) {
+        setPwSaved(true);
+        setCurrentPassword('');
+        setNewPassword('');
+        setTimeout(() => setPwSaved(false), 3000);
+      } else {
+        const text = await res.text();
+        setPwError(text || 'Failed to update password.');
+      }
+    } catch {
+      setPwError('Could not connect to server. Please try again.');
+    } finally {
+      setPwLoading(false);
+    }
+  };
+
+  const toggleNotification = (id) => {
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, active: !n.active } : n)));
+  };
+
+  const handleNotifSave = (e) => {
+    e.preventDefault();
+    setNotifLoading(true);
+    // Persist to localStorage (no backend endpoint for this yet)
     setTimeout(() => {
-      setIsLoading(false);
-      setIsSaved(true);
-      setTimeout(() => setIsSaved(false), 3000);
-    }, 1500);
+      localStorage.setItem(`notifs_${user.id}`, JSON.stringify(notifications));
+      setNotifLoading(false);
+      setNotifSaved(true);
+      setTimeout(() => setNotifSaved(false), 3000);
+    }, 600);
   };
 
   if (!user) return null;
@@ -44,134 +92,162 @@ const SettingsPage = () => {
     <DashboardLayout role={user.role === 'NGO' ? 'NGO' : 'Donor'}>
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-           <h1 className="text-3xl font-bold font-serif text-slate-900 mb-2">Account Control Center</h1>
-           <p className="text-slate-500">Manage your institutional security protocols and communication preferences.</p>
+          <h1 className="text-3xl font-bold font-serif text-slate-900 mb-2">Account Settings</h1>
+          <p className="text-slate-500">Manage your security and notification preferences.</p>
         </div>
 
+        {/* Tab switcher */}
         <div className="flex bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden mb-8">
-           <button 
-             onClick={() => setActiveTab('security')}
-             className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-bold uppercase tracking-widest transition-colors ${activeTab === 'security' ? 'bg-primary-700 text-white' : 'text-slate-500 hover:bg-slate-50'}`}
-           >
-              <Lock size={16} /> Security Settings
-           </button>
-           <button 
-             onClick={() => setActiveTab('notifications')}
-             className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-bold uppercase tracking-widest transition-colors ${activeTab === 'notifications' ? 'bg-primary-700 text-white' : 'text-slate-500 hover:bg-slate-50'}`}
-           >
-              <Bell size={16} /> Communication Hooks
-           </button>
+          <button
+            onClick={() => setActiveTab('security')}
+            className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-bold uppercase tracking-widest transition-colors ${
+              activeTab === 'security' ? 'bg-primary-700 text-white' : 'text-slate-500 hover:bg-slate-50'
+            }`}
+          >
+            <Lock size={16} /> Security
+          </button>
+          <button
+            onClick={() => setActiveTab('notifications')}
+            className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-bold uppercase tracking-widest transition-colors ${
+              activeTab === 'notifications' ? 'bg-primary-700 text-white' : 'text-slate-500 hover:bg-slate-50'
+            }`}
+          >
+            <Bell size={16} /> Notifications
+          </button>
         </div>
 
         {activeTab === 'security' ? (
-          <div className="space-y-8">
-            <div className="structured-card p-10 bg-white">
-               <h3 className="text-xl font-bold text-slate-900 mb-6 font-serif">Credential Update</h3>
-               <form onSubmit={handleSave} className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-6">
-                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Current Identifier (Phone)</label>
-                        <input type="tel" value={user.phone} readOnly className="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded text-slate-500 cursor-not-allowed text-sm font-mono" />
-                     </div>
-                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1.5 uppercase tracking-wide">Update Operational Email</label>
-                        <div className="relative">
-                           <Mail className="absolute left-3 top-3 text-slate-400" size={18} />
-                           <input type="email" placeholder="official@agency.org" className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 outline-none text-sm transition-colors" />
-                        </div>
-                     </div>
-                  </div>
+          <div className="structured-card p-10 bg-white">
+            <h3 className="text-xl font-bold text-slate-900 mb-6 font-serif">Change Password</h3>
+            <form onSubmit={handlePasswordSave} className="space-y-6">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
+                  Phone (read-only)
+                </label>
+                <input
+                  type="tel"
+                  value={user.phone}
+                  readOnly
+                  className="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded text-slate-500 cursor-not-allowed text-sm font-mono"
+                />
+              </div>
 
-                  <div>
-                     <label className="block text-sm font-bold text-slate-700 mb-1.5 uppercase tracking-wide">New Access Token (Password)</label>
-                     <div className="relative">
-                        <Shield className="absolute left-3 top-3 text-slate-400" size={18} />
-                        <input 
-                           type={showPassword ? "text" : "password"} 
-                           placeholder="••••••••••••" 
-                           className="w-full pl-10 pr-12 py-3 bg-slate-50 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 outline-none text-sm font-mono" 
-                        />
-                        <button 
-                          type="button" 
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
-                        >
-                           {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </button>
-                     </div>
-                     <p className="text-[10px] text-slate-400 mt-2 font-medium uppercase tracking-wider">Minimum 12 characters required for enterprise security compliance.</p>
-                  </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
+                  Current Password
+                </label>
+                <div className="relative">
+                  <Shield className="absolute left-3 top-3 text-slate-400" size={18} />
+                  <input
+                    type={showCurrent ? 'text' : 'password'}
+                    required
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full pl-10 pr-12 py-3 bg-slate-50 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 outline-none text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrent(!showCurrent)}
+                    className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                  >
+                    {showCurrent ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
 
-                  <div className="p-4 bg-amber-50 border border-amber-100 rounded flex gap-4">
-                     <AlertTriangle className="text-amber-600 shrink-0" size={20} />
-                     <p className="text-xs text-amber-800 leading-relaxed font-medium">
-                        Changing your security credentials will invalidate all active hardware tokens and require a systematic re-login across all logistics terminals.
-                     </p>
-                  </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
+                  New Password
+                </label>
+                <div className="relative">
+                  <Shield className="absolute left-3 top-3 text-slate-400" size={18} />
+                  <input
+                    type={showNew ? 'text' : 'password'}
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full pl-10 pr-12 py-3 bg-slate-50 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 outline-none text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNew(!showNew)}
+                    className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                  >
+                    {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                <p className="text-xs text-slate-400 mt-1">Minimum 8 characters.</p>
+              </div>
 
-                  <div className="flex justify-end">
-                     <button type="submit" disabled={isLoading} className={`px-8 py-3 rounded font-bold text-sm flex items-center gap-2 transition-all ${isSaved ? 'bg-green-600 text-white' : 'bg-primary-700 hover:bg-primary-800 text-white'}`}>
-                        {isLoading ? <Loader2 className="animate-spin" size={18} /> : (isSaved ? <CheckCircle size={18} /> : <Save size={18} />)}
-                        {isSaved ? 'Security Verified' : 'Update Security Protocol'}
-                     </button>
-                  </div>
-               </form>
-            </div>
+              {pwError && (
+                <div className="p-3 bg-red-50 border border-red-100 rounded text-sm text-red-700 flex gap-2">
+                  <AlertTriangle size={16} className="shrink-0 mt-0.5" /> {pwError}
+                </div>
+              )}
 
-            <div className="structured-card p-10 bg-slate-900 text-white border-none shadow-xl">
-               <div className="flex items-center justify-between mb-8">
-                  <div>
-                     <h3 className="text-xl font-bold mb-1">MFA Verification</h3>
-                     <p className="text-primary-300 text-sm">Require a biometric or SMS token for every sensitive transaction.</p>
-                  </div>
-                  <div className="w-14 h-8 bg-primary-800 rounded-full relative p-1 cursor-pointer">
-                     <div className="w-6 h-6 bg-accent-500 rounded-full shadow-sm"></div>
-                  </div>
-               </div>
-               
-               <div className="grid sm:grid-cols-2 gap-6">
-                  <div className="p-4 bg-primary-800/40 rounded border border-primary-700">
-                     <Smartphone className="mb-3 text-accent-400" size={24} />
-                     <h4 className="font-bold mb-1">SMS Guard</h4>
-                     <p className="text-xs text-primary-200">OTP requested for all batch claims over 100 units.</p>
-                  </div>
-                  <div className="p-4 bg-primary-800/40 rounded border border-primary-700">
-                     <Globe className="mb-3 text-accent-400" size={24} />
-                     <h4 className="font-bold mb-1">IP Whitelisting</h4>
-                     <p className="text-xs text-primary-200">Restricts dashboard access to verified facility networks only.</p>
-                  </div>
-               </div>
-            </div>
+              <div className="p-4 bg-amber-50 border border-amber-100 rounded flex gap-4">
+                <AlertTriangle className="text-amber-600 shrink-0" size={20} />
+                <p className="text-xs text-amber-800 leading-relaxed font-medium">
+                  Changing your password will log you out of all active sessions.
+                </p>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  disabled={pwLoading}
+                  className={`px-8 py-3 rounded font-bold text-sm flex items-center gap-2 transition-all ${
+                    pwSaved ? 'bg-green-600 text-white' : 'bg-primary-700 hover:bg-primary-800 text-white'
+                  }`}
+                >
+                  {pwLoading ? <Loader2 className="animate-spin" size={18} /> : pwSaved ? <CheckCircle size={18} /> : <Save size={18} />}
+                  {pwSaved ? 'Password Updated' : 'Update Password'}
+                </button>
+              </div>
+            </form>
           </div>
         ) : (
           <div className="structured-card p-10 bg-white">
-             <h3 className="text-xl font-bold text-slate-900 mb-6 font-serif">Communication Hooks</h3>
-             <form onSubmit={handleSave} className="space-y-10">
-                <div className="space-y-6">
-                   {[
-                     { id: 'new_donations', label: 'Real-time Surplus Alerts', active: true, desc: 'Instant notification when a new surplus batch is logged within 10km.' },
-                     { id: 'claim_updates', label: 'Claim Handshake Notifications', active: true, desc: 'Direct alerts for authorization code requests during physical handovers.' },
-                     { id: 'impact_benchmarks', label: 'Monthly ESG Performance', active: false, desc: 'Aggregated analytics of your organizations environmental impact.' },
-                     { id: 'system_logistics', label: 'Hardware & API Status', active: true, desc: 'Critical alerts regarding WebSocket maintenance or cloud uptime.' },
-                   ].map(hook => (
-                     <div key={hook.id} className="flex items-start justify-between pb-6 border-b border-slate-100 last:border-0 last:pb-0">
-                        <div className="max-w-lg">
-                           <h4 className="font-bold text-slate-900 mb-1">{hook.label}</h4>
-                           <p className="text-xs text-slate-500 leading-relaxed font-medium">{hook.desc}</p>
-                        </div>
-                        <div className={`w-12 h-6 rounded-full relative p-1 cursor-pointer transition-colors ${hook.active ? 'bg-primary-700' : 'bg-slate-200'}`}>
-                           <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${hook.active ? 'translate-x-6' : 'translate-x-0'}`}></div>
-                        </div>
-                     </div>
-                   ))}
-                </div>
+            <h3 className="text-xl font-bold text-slate-900 mb-6 font-serif">Notification Preferences</h3>
+            <form onSubmit={handleNotifSave} className="space-y-10">
+              <div className="space-y-6">
+                {notifications.map((n) => (
+                  <div key={n.id} className="flex items-start justify-between pb-6 border-b border-slate-100 last:border-0 last:pb-0">
+                    <div className="max-w-lg">
+                      <h4 className="font-bold text-slate-900 mb-1">{n.label}</h4>
+                      <p className="text-xs text-slate-500 leading-relaxed">{n.desc}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleNotification(n.id)}
+                      className={`w-12 h-6 rounded-full relative p-1 transition-colors shrink-0 ml-6 ${
+                        n.active ? 'bg-primary-700' : 'bg-slate-200'
+                      }`}
+                      aria-label={`Toggle ${n.label}`}
+                    >
+                      <div
+                        className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${
+                          n.active ? 'translate-x-6' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                ))}
+              </div>
 
-                <div className="pt-6 border-t border-slate-100 flex justify-end">
-                   <button type="submit" disabled={isLoading} className="btn-primary px-10">
-                      {isLoading ? <Loader2 className="animate-spin" size={18} /> : 'Save Hook Preferences'}
-                   </button>
-                </div>
-             </form>
+              <div className="pt-6 border-t border-slate-100 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={notifLoading}
+                  className={`btn-primary px-10 flex items-center gap-2 ${notifSaved ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                >
+                  {notifLoading ? <Loader2 className="animate-spin" size={18} /> : notifSaved ? <CheckCircle size={18} /> : null}
+                  {notifSaved ? 'Saved' : 'Save Preferences'}
+                </button>
+              </div>
+            </form>
           </div>
         )}
       </div>

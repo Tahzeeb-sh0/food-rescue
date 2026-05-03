@@ -1,17 +1,19 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Building, FileText, Mail, Lock, ShieldAlert, Loader2 } from 'lucide-react';
+import { Building, Mail, Lock, ShieldAlert, Loader2 } from 'lucide-react';
 
 const RegisterPage = () => {
   const [name, setName] = React.useState('');
   const [phone, setPhone] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     try {
       const res = await fetch('http://localhost:8080/api/users/register', {
         method: 'POST',
@@ -30,11 +32,11 @@ const RegisterPage = () => {
         localStorage.setItem('user', JSON.stringify(user));
         navigate('/ngo/dashboard');
       } else {
-        alert('Registration failed.');
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || 'Registration failed. This phone number may already be registered.');
       }
-    } catch (err) {
-      console.error(err);
-      navigate('/ngo/dashboard');
+    } catch {
+      setError('Could not connect to server. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -76,8 +78,8 @@ const RegisterPage = () => {
       
       <div className="flex-1 flex items-center justify-center p-8 sm:p-12 lg:p-20 bg-white">
         <div className="w-full max-w-lg">
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Submit Organization Application</h2>
-          <p className="text-slate-600 mb-8 border-b border-slate-200 pb-6 text-sm">Complete the form below to begin the official review process.</p>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Create NGO Account</h2>
+          <p className="text-slate-600 mb-8 border-b border-slate-200 pb-6 text-sm">Fill in your details to apply for access.</p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
@@ -115,17 +117,7 @@ const RegisterPage = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Director Credentials</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FileText className="h-5 w-5 text-slate-400" />
-                </div>
-                <input type="text" readOnly className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded sm:text-sm bg-slate-100 text-slate-500 cursor-not-allowed" placeholder="Director Email (Optional for Demo)" />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Create Access Password</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">Create Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-slate-400" />
@@ -154,12 +146,13 @@ const RegisterPage = () => {
                 disabled={isLoading}
                 className="w-full flex justify-center items-center gap-2 py-3 border border-transparent rounded shadow-sm text-sm font-bold text-white bg-primary-700 hover:bg-primary-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors disabled:opacity-50"
               >
-                 {isLoading ? <Loader2 className="animate-spin" size={18}/> : 'Submit Complete Application'}
+                 {isLoading ? <Loader2 className="animate-spin" size={18}/> : 'Create Account'}
               </button>
+              {error && <p className="text-sm text-red-600 text-center mt-3">{error}</p>}
             </div>
             
             <p className="mt-6 text-center text-sm text-slate-500 font-medium">
-               Application already approved? <Link to="/ngo/login" className="text-primary-700 hover:underline">Access Portal</Link>
+               Already have an account? <Link to="/ngo/login" className="text-primary-700 hover:underline">Sign in</Link>
             </p>
           </form>
         </div>

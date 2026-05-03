@@ -67,7 +67,7 @@ const Register = () => {
             transition={{ delay: 0.5 }}
             className="flex items-center gap-2"
           >
-            <div className="w-8 h-8 bg-[#21c45d] rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-primary-700 rounded-lg flex items-center justify-center">
               <Leaf className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-bold">FoodRescue</span>
@@ -147,7 +147,7 @@ const Register = () => {
                 value={formData.fullName}
                 onChange={handleChange}
                 placeholder="John Doe"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#21c45d] focus:ring-2 focus:ring-[#21c45d]/20 outline-none transition-all placeholder:text-gray-400"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-600 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all placeholder:text-gray-400"
                 required
               />
             </motion.div>
@@ -168,7 +168,7 @@ const Register = () => {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="name@email.com"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#21c45d] focus:ring-2 focus:ring-[#21c45d]/20 outline-none transition-all placeholder:text-gray-400"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-600 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all placeholder:text-gray-400"
                 required
               />
             </motion.div>
@@ -184,7 +184,7 @@ const Register = () => {
                 Phone
               </label>
               <div className="flex gap-2">
-                <select className="px-3 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:border-[#21c45d] focus:ring-2 focus:ring-[#21c45d]/20 outline-none">
+                <select className="px-3 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:border-primary-600 focus:ring-2 focus:ring-primary-500/20 outline-none">
                   <option value="+91">🇮🇳 +91</option>
                   <option value="+1">🇺🇸 +1</option>
                   <option value="+44">🇬🇧 +44</option>
@@ -195,7 +195,7 @@ const Register = () => {
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="(555) 000-0000"
-                  className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:border-[#21c45d] focus:ring-2 focus:ring-[#21c45d]/20 outline-none transition-all placeholder:text-gray-400"
+                  className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-600 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all placeholder:text-gray-400"
                   required
                 />
               </div>
@@ -218,7 +218,7 @@ const Register = () => {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#21c45d] focus:ring-2 focus:ring-[#21c45d]/20 outline-none transition-all placeholder:text-gray-400"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-600 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all placeholder:text-gray-400"
                   required
                 />
                 <button
@@ -239,7 +239,7 @@ const Register = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
-              className="w-full py-3.5 bg-[#21c45d] hover:bg-[#1aa84d] text-white font-semibold rounded-xl shadow-lg shadow-[#21c45d]/30 transition-all duration-200"
+              className="w-full py-3.5 bg-primary-700 hover:bg-primary-800 text-white font-semibold rounded-xl shadow-lg shadow-primary-700/30 transition-all duration-200"
             >
               Create Account
             </motion.button>
@@ -302,7 +302,7 @@ const Register = () => {
             className="text-center mt-6 text-sm text-gray-600"
           >
             Already have an account?{' '}
-            <Link to="/ngo/login" className="text-[#21c45d] font-semibold hover:underline">
+            <Link to="/ngo/register" className="text-primary-700 font-semibold hover:underline">
               Log in
             </Link>
           </motion.p>

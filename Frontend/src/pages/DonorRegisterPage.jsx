@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building2, Briefcase, FileText, CheckCircle2, Loader2 } from 'lucide-react';
+import { Building2, Briefcase, Lock, CheckCircle2, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const DonorRegisterPage = () => {
@@ -7,11 +7,13 @@ const DonorRegisterPage = () => {
   const [phone, setPhone] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     try {
       const res = await fetch('http://localhost:8080/api/users/register', {
         method: 'POST',
@@ -30,11 +32,11 @@ const DonorRegisterPage = () => {
         localStorage.setItem('user', JSON.stringify(user));
         navigate('/donor/dashboard');
       } else {
-        alert('Registration failed.');
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || 'Registration failed. This phone number may already be registered.');
       }
-    } catch (err) {
-      console.warn("Backend offline. Bypassing registration for demo.");
-      navigate('/donor/dashboard');
+    } catch {
+      setError('Could not connect to server. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -76,8 +78,8 @@ const DonorRegisterPage = () => {
       {/* Right Form Panel */}
       <div className="flex-1 flex flex-col py-12 px-6 sm:px-12 lg:px-20 bg-white">
         <div className="max-w-xl w-full mx-auto">
-          <h2 className="text-2xl font-bold text-slate-900 mb-2 font-serif">Initiate Enterprise Onboarding</h2>
-          <p className="text-slate-500 mb-8 border-b border-slate-200 pb-6 text-sm">Please provide accurate corporate entity details to allow for immediate credentialing.</p>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2 font-serif">Create Your Donor Account</h2>
+          <p className="text-slate-500 mb-8 border-b border-slate-200 pb-6 text-sm">Fill in your details to get started.</p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
@@ -112,9 +114,9 @@ const DonorRegisterPage = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Access Password</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">Password</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><FileText className="h-5 w-5 text-slate-400" /></div>
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Lock className="h-5 w-5 text-slate-400" /></div>
                 <input 
                   type="password" 
                   required 
@@ -149,12 +151,12 @@ const DonorRegisterPage = () => {
                 disabled={isLoading}
                 className="w-full flex justify-center items-center gap-2 py-3 border border-transparent rounded shadow-sm text-sm font-bold text-white bg-primary-700 hover:bg-primary-800 transition-colors uppercase tracking-widest disabled:opacity-50"
               >
-                 {isLoading ? <Loader2 className="animate-spin" size={18}/> : 'Generate Authorization Profile'}
+                 {isLoading ? <Loader2 className="animate-spin" size={18}/> : 'Create Account'}
               </button>
             </div>
             
             <p className="mt-8 text-center text-sm text-slate-500 font-medium pb-12">
-               Access established? <Link to="/donor/login" className="text-primary-700 hover:underline">Launch Enterprise Login</Link>
+               Already have an account? <Link to="/donor/login" className="text-primary-700 hover:underline">Sign in</Link>
             </p>
           </form>
         </div>

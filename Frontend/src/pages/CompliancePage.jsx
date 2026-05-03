@@ -7,7 +7,8 @@ import {
   Download, 
   BookOpen,
   Gavel,
-  Verified
+  Verified,
+  CheckCircle
 } from 'lucide-react';
 
 const CompliancePage = () => {

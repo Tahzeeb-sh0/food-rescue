@@ -12,12 +12,17 @@ import org.springframework.data.geo.Point;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class DonationService {
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DonationService.class);
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private final DonationRepository donationRepository;
     private final UserRepository userRepository;
@@ -98,6 +103,10 @@ public class DonationService {
         return savedDonation;
     }
 
+    public Optional<Donation> getDonationById(String donationId) {
+        return donationRepository.findById(donationId);
+    }
+
     public List<Donation> getDonationsByDonor(String donorId) {
         return donationRepository.findByDonorId(donorId);
     }
@@ -106,7 +115,23 @@ public class DonationService {
         return donationRepository.findByClaimedByNgoId(ngoId);
     }
 
+    public void cancelDonation(String donationId, String donorId) {
+        Donation donation = donationRepository.findById(donationId)
+                .orElseThrow(() -> new RuntimeException("Donation not found"));
+
+        if (!donorId.equals(donation.getDonorId())) {
+            throw new RuntimeException("Only the donor can cancel this donation");
+        }
+
+        if (donation.getStatus() == DonationStatus.COMPLETED) {
+            throw new RuntimeException("Cannot cancel a completed donation");
+        }
+
+        donationRepository.delete(donation);
+        messagingTemplate.convertAndSend("/topic/donations/cancelled", donationId);
+    }
+
     private String generateConfirmationCode() {
-        return String.format("%06d", (int)(Math.random() * 1000000));
+        return String.format("%06d", SECURE_RANDOM.nextInt(1_000_000));
     }
 }
