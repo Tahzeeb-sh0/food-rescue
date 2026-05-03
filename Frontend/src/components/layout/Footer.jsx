@@ -14,30 +14,42 @@ import { Link } from 'react-router-dom';
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
-  const footerLinks = {
-    organization: [
-      { name: 'Our Mission', path: '/about' },
-      { name: 'Financial Transparency', path: '/reports' },
-      { name: 'Board of Directors', path: '/board' },
-      { name: 'Press & Media', path: '/press' },
-    ],
-    operations: [
-      { name: 'Logistics Framework', path: '/howitworks' },
-      { name: 'Annual Impact Report', path: '/impact' },
-      { name: 'Global Network', path: '/network' },
-      { name: 'Safety Standards', path: '/safety' },
-    ],
-    partnerships: [
-      { name: 'Corporate Intake', path: '/donate' },
-      { name: 'NGO Verification', path: '/ngo/register' },
-      { name: 'API Documentation', path: '/api' },
-    ],
-    legal: [
-      { name: 'Privacy Policy', path: '/privacy' },
-      { name: 'Terms of Service', path: '/terms' },
-      { name: 'Compliance Code', path: '/compliance' },
-    ],
-  };
+  const footerLinks = [
+    {
+      label: 'Organization',
+      links: [
+        { name: 'Our Mission', path: '/about' },
+        { name: 'Financial Transparency', path: '/reports' },
+        { name: 'Board of Directors', path: '/board' },
+        { name: 'Press & Media', path: '/press' },
+      ],
+    },
+    {
+      label: 'Platform',
+      links: [
+        { name: 'How It Works', path: '/howitworks' },
+        { name: 'Impact Report', path: '/impact' },
+        { name: 'Our Network', path: '/network' },
+        { name: 'Safety Standards', path: '/safety' },
+      ],
+    },
+    {
+      label: 'Get Involved',
+      links: [
+        { name: 'Donate Food', path: '/donate' },
+        { name: 'Register as NGO', path: '/ngo/register' },
+        { name: 'API Docs', path: '/api' },
+      ],
+    },
+    {
+      label: 'Legal',
+      links: [
+        { name: 'Privacy Policy', path: '/privacy' },
+        { name: 'Terms of Service', path: '/terms' },
+        { name: 'Compliance', path: '/compliance' },
+      ],
+    },
+  ];
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -54,14 +66,14 @@ const Footer = () => {
               Transforming Surplus into Sustenance.
             </h3>
             <p className="text-primary-200 font-medium">
-              Join the verified network of international donors and logistical NGOs.
+              Join our network of food donors and NGOs making a real difference.
             </p>
           </div>
           <Link
             to="/donate"
             className="btn-accent px-8"
           >
-            Initiate Corporate Partnership
+            Start Donating Food
           </Link>
         </div>
 
@@ -95,10 +107,10 @@ const Footer = () => {
             </div>
           </div>
 
-          {Object.entries(footerLinks).map(([category, links]) => (
-            <div key={category}>
+          {footerLinks.map(({ label, links }) => (
+            <div key={label}>
                <h4 className="text-xs font-bold uppercase tracking-widest text-primary-400 mb-5">
-                 {category}
+                 {label}
                </h4>
                <ul className="space-y-3">
                  {links.map((link) => (
@@ -125,13 +137,13 @@ const Footer = () => {
 
             {/* Social Links */}
             <div className="flex items-center gap-4">
-               <a href="#" className="w-10 h-10 bg-primary-900 border border-primary-800 hover:bg-primary-800 rounded flex items-center justify-center transition-colors text-primary-300 hover:text-white">
+               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="w-10 h-10 bg-primary-900 border border-primary-800 hover:bg-primary-800 rounded flex items-center justify-center transition-colors text-primary-300 hover:text-white">
                  <Facebook className="w-4 h-4" />
                </a>
-               <a href="#" className="w-10 h-10 bg-primary-900 border border-primary-800 hover:bg-primary-800 rounded flex items-center justify-center transition-colors text-primary-300 hover:text-white">
+               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter / X" className="w-10 h-10 bg-primary-900 border border-primary-800 hover:bg-primary-800 rounded flex items-center justify-center transition-colors text-primary-300 hover:text-white">
                  <Twitter className="w-4 h-4" />
                </a>
-               <a href="#" className="w-10 h-10 bg-primary-900 border border-primary-800 hover:bg-primary-800 rounded flex items-center justify-center transition-colors text-primary-300 hover:text-white">
+               <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="w-10 h-10 bg-primary-900 border border-primary-800 hover:bg-primary-800 rounded flex items-center justify-center transition-colors text-primary-300 hover:text-white">
                  <Linkedin className="w-4 h-4" />
                </a>
             </div>

@@ -108,6 +108,7 @@ const RegisterPage = () => {
                 <input 
                   type="tel" 
                   required
+                  autoComplete="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-colors outline-none bg-slate-50 text-slate-900" 
@@ -125,6 +126,8 @@ const RegisterPage = () => {
                 <input 
                   type="password" 
                   required 
+                  minLength={8}
+                  autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-colors outline-none bg-slate-50 text-slate-900" 
@@ -136,7 +139,7 @@ const RegisterPage = () => {
             <div className="flex items-start mt-4">
                <input id="terms" name="terms" type="checkbox" className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-slate-300 rounded mt-0.5" required/>
                <label htmlFor="terms" className="ml-2 block text-sm text-slate-600 leading-tight">
-                 I, as an authorized representative, agree to the <Link to="/terms" className="text-primary-700 font-semibold hover:underline">Terms of Service</Link> and strictly adhere to the local <span className="font-semibold text-slate-800">Food Safety and Handling Code</span>.
+                 I agree to the <Link to="/terms" className="text-primary-700 font-semibold hover:underline">Terms of Service</Link> and confirm I will follow local food safety guidelines.
                </label>
             </div>
 

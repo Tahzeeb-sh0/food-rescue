@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Heart, Users, Globe, ChevronDown, ShieldCheck } from 'lucide-react';
 
@@ -6,6 +6,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const location = useLocation();
+  const dropdownRef = useRef(null);
 
   const navLinks = [
     { name: 'How It Works', path: '/howitworks', icon: <Heart className="w-4 h-4" /> },
@@ -14,6 +15,23 @@ const Header = () => {
   ];
 
   const isActive = (path) => location.pathname === path;
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMenuOpen(false);
+    setIsDropdownOpen(false);
+  }, [location.pathname]);
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
@@ -58,7 +76,7 @@ const Header = () => {
         {/* CTA Buttons */}
         <div className="hidden md:flex items-center gap-3">
           {/* NGO Dropdown */}
-          <div className="relative">
+          <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-700 bg-white hover:bg-slate-50 rounded border border-slate-200 transition-all duration-200"
@@ -96,6 +114,7 @@ const Header = () => {
         {/* Mobile Menu Button */}
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
+          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
           className="md:hidden p-2 rounded text-slate-600 hover:bg-slate-100 transition-colors"
         >
           {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

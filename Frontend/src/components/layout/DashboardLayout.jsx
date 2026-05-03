@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Heart, History, Settings, LogOut, Bell, Menu, X, User, ShieldCheck, TrendingUp, Globe } from 'lucide-react';
+import { LayoutDashboard, Heart, History, Settings, LogOut, Menu, X, User, ShieldCheck, Globe } from 'lucide-react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
+import NotificationCenter from '../NotificationCenter';
 
 const DashboardLayout = ({ children, role }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -54,6 +55,7 @@ const DashboardLayout = ({ children, role }) => {
           </Link>
           <button 
             className="lg:hidden ml-auto p-2 text-slate-400 hover:text-slate-600 focus:outline-none"
+            aria-label="Close sidebar"
             onClick={() => setSidebarOpen(false)}
           >
             <X size={20} />
@@ -92,23 +94,8 @@ const DashboardLayout = ({ children, role }) => {
             })}
           </nav>
 
-          {/* Quick Metrics (Sidebar Content) */}
-          <div className="mt-12 bg-slate-50 rounded-[2rem] p-6 border border-slate-100">
-             <div className="flex items-center gap-2 mb-4">
-                <TrendingUp size={16} className="text-green-600" />
-                <span className="text-[10px] font-bold text-slate-900 uppercase tracking-widest text-xs">Recent Performance</span>
-             </div>
-             <div className="space-y-4">
-                <div className="flex justify-between items-end">
-                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Efficiency</p>
-                   <p className="text-sm font-bold text-slate-900 leading-none">94%</p>
-                </div>
-                <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                   <div className="w-[94%] h-full bg-primary-700"></div>
-                </div>
-                <p className="text-[9px] text-slate-400 italic font-medium leading-relaxed">System optimization target: +2% for Platinum rank.</p>
-             </div>
-          </div>
+          {/* Sidebar footer spacer */}
+          <div className="mt-12"></div>
         </div>
 
         {/* User Card */}
@@ -138,6 +125,7 @@ const DashboardLayout = ({ children, role }) => {
           <div className="flex items-center gap-6">
             <button 
               className="lg:hidden p-2.5 bg-slate-100 rounded-xl text-slate-600 hover:bg-slate-200 focus:outline-none transition-colors"
+              aria-label="Open sidebar"
               onClick={() => setSidebarOpen(true)}
             >
               <Menu size={22} />
@@ -157,10 +145,10 @@ const DashboardLayout = ({ children, role }) => {
           
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100 group hover:border-primary-100 transition-all cursor-default relative">
-               <div className="w-2 h-2 rounded-full bg-primary-700 animate-pulse"></div>
-               <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Global Ops: Live</span>
+               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+               <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Connected</span>
             </div>
-            <button className="relative p-2.5 text-slate-400 rounded-xl hover:bg-slate-50 transition-all group">
+            <button className="relative p-2.5 text-slate-400 rounded-xl hover:bg-slate-50 transition-all group" aria-label="Notifications">
               <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-accent-500 rounded-full border-2 border-white shadow-[0_0_8px_rgba(255,215,0,0.4)]"></span>
               <Bell size={22} className="group-hover:scale-110 transition-transform" />
             </button>

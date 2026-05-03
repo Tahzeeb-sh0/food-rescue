@@ -63,6 +63,7 @@ const DonorLoginPage = () => {
                 <input 
                   type="tel" 
                   required 
+                  autoComplete="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 transition-colors outline-none text-slate-900" 
@@ -80,6 +81,7 @@ const DonorLoginPage = () => {
                 <input 
                   type="password" 
                   required 
+                  autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 outline-none transition-all" 

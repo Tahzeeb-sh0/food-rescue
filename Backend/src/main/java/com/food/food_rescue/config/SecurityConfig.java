@@ -32,6 +32,7 @@ public class SecurityConfig {
                     "/api/users/reset-password",
                     "/api/contact",
                     "/api/stats/**",
+                    "/api/leaderboard",
                     "/ws/**"
                 ).permitAll()
                 // Everything else requires authentication

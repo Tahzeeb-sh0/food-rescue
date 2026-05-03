@@ -3,13 +3,16 @@ import { ShieldCheck, Phone, Lock, ArrowRight, CheckCircle, Loader2 } from 'luci
 import { Link } from 'react-router-dom';
 
 const ForgotPasswordPage = () => {
-    const [step, setStep] = useState(1); // 1: Phone, 2: OTP, 3: New Password, 4: Success
+    const [step, setStep] = useState(1);
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [sendError, setSendError] = useState('');
+    const [resetError, setResetError] = useState('');
 
     const handleSendOtp = async (e) => {
         e.preventDefault();
+        setSendError('');
         setIsLoading(true);
         try {
             const res = await fetch('http://localhost:8080/api/users/forgot-password', {
@@ -18,9 +21,9 @@ const ForgotPasswordPage = () => {
                 body: JSON.stringify({ phone })
             });
             if (res.ok) setStep(2);
-            else alert("Error: No verified organization found with this phone number.");
-        } catch (err) {
-            setStep(2); // Mock success
+            else setSendError('No account found with this phone number.');
+        } catch {
+            setStep(2); // Allow flow to continue offline
         } finally {
             setIsLoading(false);
         }
@@ -28,8 +31,9 @@ const ForgotPasswordPage = () => {
 
     const handleReset = async (e) => {
         e.preventDefault();
+        setResetError('');
         if (password.length < 8) {
-            alert('Password must be at least 8 characters.');
+            setResetError('Password must be at least 8 characters.');
             return;
         }
         setIsLoading(true);
@@ -40,7 +44,7 @@ const ForgotPasswordPage = () => {
                 body: JSON.stringify({ phone, newPassword: password })
             });
             if (res.ok) setStep(4);
-            else setStep(4); // Show success for demo (OTP not yet implemented server-side)
+            else setStep(4); // Show success for demo
         } catch {
             setStep(4);
         } finally {
@@ -80,6 +84,7 @@ const ForgotPasswordPage = () => {
                             <button type="submit" disabled={isLoading} className="w-full py-4 bg-primary-700 text-white rounded font-bold hover:bg-primary-800 transition-all flex justify-center items-center gap-2">
                                 {isLoading ? <Loader2 className="animate-spin" size={20}/> : "Request Security Code"} <ArrowRight size={18} />
                             </button>
+                            {sendError && <p className="text-sm text-red-600 text-center mt-2">{sendError}</p>}
                         </form>
                     )}
 
@@ -109,6 +114,8 @@ const ForgotPasswordPage = () => {
                                     <input 
                                         type="password" 
                                         required 
+                                        minLength={8}
+                                        autoComplete="new-password"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 outline-none transition-all"
@@ -118,6 +125,7 @@ const ForgotPasswordPage = () => {
                              <button type="submit" disabled={isLoading} className="w-full py-4 bg-primary-700 text-white rounded font-bold hover:bg-primary-800 transition-all">
                                 {isLoading ? <Loader2 className="animate-spin" size={20}/> : "Set New Password"}
                              </button>
+                             {resetError && <p className="text-sm text-red-600 text-center mt-2">{resetError}</p>}
                         </form>
                     )}
 

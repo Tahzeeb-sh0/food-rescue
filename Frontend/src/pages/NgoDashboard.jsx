@@ -4,6 +4,7 @@ import SockJS from 'sockjs-client';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import ChatBox from '../components/ChatBox';
 import MapView from '../components/MapView';
+import DonationDetailModal from '../components/DonationDetailModal';
 import { 
   Leaf, 
   Clock, 
@@ -22,10 +23,42 @@ import {
   Bell,
   X,
   Package,
-  AlertCircle
+  AlertCircle,
+  Star,
+  SlidersHorizontal
 } from 'lucide-react';
 
-// ── Alert Toast Component ──────────────────────────────────────────────────────
+// ── Pickup Countdown Timer ─────────────────────────────────────────────────────
+const PickupCountdown = ({ claimedAt }) => {
+  const WINDOW_MINUTES = 90;
+  const [remaining, setRemaining] = useState('');
+  const [isUrgent, setIsUrgent] = useState(false);
+
+  useEffect(() => {
+    const tick = () => {
+      const deadline = new Date(claimedAt).getTime() + WINDOW_MINUTES * 60 * 1000;
+      const diff = deadline - Date.now();
+      if (diff <= 0) {
+        setRemaining('Expired');
+        setIsUrgent(true);
+        return;
+      }
+      const mins = Math.floor(diff / 60000);
+      const secs = Math.floor((diff % 60000) / 1000);
+      setRemaining(`${mins}m ${secs.toString().padStart(2, '0')}s`);
+      setIsUrgent(mins < 15);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [claimedAt]);
+
+  return (
+    <span className={`text-xs font-bold font-mono ${isUrgent ? 'text-red-500' : 'text-emerald-600'}`}>
+      ⏱ {remaining}
+    </span>
+  );
+};
 const DonationAlert = ({ donation, onClaim, onDismiss }) => (
   <div className="flex items-start gap-4 bg-white rounded-xl shadow-2xl border border-primary-100 p-4 w-full max-w-sm animate-in slide-in-from-right-8 duration-300">
     <div className="p-2.5 bg-accent-50 rounded-lg shrink-0">
@@ -65,6 +98,12 @@ const NgoDashboard = () => {
   const [user, setUser] = useState(null);
   const [viewMode, setViewMode] = useState('grid');
   const [fetchError, setFetchError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
+  const [minCapacity, setMinCapacity] = useState('');
+  const [avgRating, setAvgRating] = useState(null);
+  const [detailDonation, setDetailDonation] = useState(null);
+  const [radius, setRadius] = useState(10);
   // Alert queue: array of donation objects
   const [alerts, setAlerts] = useState([]);
 
@@ -103,14 +142,18 @@ const NgoDashboard = () => {
     if (savedUser) {
       const parsedUser = JSON.parse(savedUser);
       setUser(parsedUser);
-      fetchNearby(parsedUser.location?.x || -74.006, parsedUser.location?.y || 40.7128, parsedUser.id);
+      fetchNearby(parsedUser.location?.x || -74.006, parsedUser.location?.y || 40.7128, parsedUser.id, radius);
+      fetch(`http://localhost:8080/api/ratings/ngo/${parsedUser.id}/average`)
+        .then(r => r.json())
+        .then(data => setAvgRating(data))
+        .catch(() => {});
     }
   }, []);
 
-  const fetchNearby = (lon, lat, userId) => {
+  const fetchNearby = (lon, lat, userId, radiusKm = 10) => {
     setIsLoading(true);
     setFetchError('');
-    fetch(`http://localhost:8080/api/donations/nearby?lon=${lon}&lat=${lat}&radiusKm=10`)
+    fetch(`http://localhost:8080/api/donations/nearby?lon=${lon}&lat=${lat}&radiusKm=${radiusKm}`)
       .then(r => {
         if (!r.ok) throw new Error('Failed');
         return r.json();
@@ -127,6 +170,13 @@ const NgoDashboard = () => {
         if (active) setActiveClaim(active);
       })
       .catch(() => console.warn('History sync failed.'));
+  };
+
+  const handleRadiusChange = (newRadius) => {
+    setRadius(newRadius);
+    if (user) {
+      fetchNearby(user.location?.x || -74.006, user.location?.y || 40.7128, user.id, newRadius);
+    }
   };
 
   useEffect(() => {
@@ -200,8 +250,29 @@ const NgoDashboard = () => {
     }
   };
 
+  const filteredDonations = donations
+    .filter(d => {
+      const matchesSearch = !searchQuery || d.title.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCapacity = !minCapacity || d.capacity >= parseInt(minCapacity);
+      return matchesSearch && matchesCapacity;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'largest') return b.capacity - a.capacity;
+      if (sortBy === 'smallest') return a.capacity - b.capacity;
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
   return (
     <DashboardLayout role="NGO">
+      {/* Donation Detail Modal */}
+      {detailDonation && (
+        <DonationDetailModal
+          donation={detailDonation}
+          currentUserRole="NGO"
+          onClose={() => setDetailDonation(null)}
+          onClaim={handleClaim}
+        />
+      )}
       {/* ── Alert Toast Stack (bottom-right, fixed) ── */}
       {alerts.length > 0 && (
         <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3 items-end">
@@ -232,7 +303,7 @@ const NgoDashboard = () => {
         </div>
       )}
       {/* 1. OPERATIONS KPIS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
         <div className="structured-card p-6 border-l-4 border-l-primary-700 bg-white border-slate-200 rounded-xl shadow-sm">
           <div className="flex items-start justify-between">
             <div>
@@ -251,9 +322,9 @@ const NgoDashboard = () => {
         <div className="structured-card p-6 border-l-4 border-l-emerald-600 bg-white border-slate-200 rounded-xl shadow-sm">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Local Network Activity</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Available Nearby</p>
               <h3 className="text-4xl font-bold font-serif text-slate-900">{donations.length}</h3>
-              <p className="text-xs text-emerald-700 font-bold mt-3 flex items-center gap-1.5 uppercase tracking-wider"><MapPin size={12}/> Scanning within 10km</p>
+              <p className="text-xs text-emerald-700 font-bold mt-3 flex items-center gap-1.5 uppercase tracking-wider"><MapPin size={12}/> Within 10km</p>
             </div>
             <div className="p-3 bg-emerald-50 text-emerald-700 rounded-lg">
               <MapPin size={20} />
@@ -272,6 +343,23 @@ const NgoDashboard = () => {
             </div>
             <div className="p-3 bg-slate-100 text-slate-700 rounded-lg">
               <Clock size={20} />
+            </div>
+          </div>
+        </div>
+
+        <div className="structured-card p-6 border-l-4 border-l-accent-500 bg-white border-slate-200 rounded-xl shadow-sm">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Your Rating</p>
+              <h3 className="text-4xl font-bold font-serif text-slate-900">
+                {avgRating ? (avgRating.count > 0 ? avgRating.average.toFixed(1) : '—') : '—'}
+              </h3>
+              <p className="text-xs text-amber-600 font-bold mt-3 flex items-center gap-1.5 uppercase tracking-wider">
+                ★ {avgRating?.count > 0 ? `${avgRating.count} review${avgRating.count > 1 ? 's' : ''}` : 'No reviews yet'}
+              </p>
+            </div>
+            <div className="p-3 bg-accent-50 text-accent-600 rounded-lg">
+              <Star size={20} />
             </div>
           </div>
         </div>
@@ -295,10 +383,18 @@ const NgoDashboard = () => {
                 <img src={activeClaim.photoUrl || "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=1200"} alt="Surplus Batch" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80"></div>
                 <div className="absolute bottom-8 left-8 text-white max-w-2xl">
-                  <div className="inline-flex items-center px-3 py-1 rounded bg-accent-600 text-white text-[10px] font-bold uppercase tracking-widest mb-4">
+                  <div className="inline-flex items-center gap-3 px-3 py-1 rounded bg-accent-600 text-white text-[10px] font-bold uppercase tracking-widest mb-4">
                      Pickup In Progress
+                     {activeClaim.claimedAt && (
+                       <span className="bg-white/20 px-2 py-0.5 rounded">
+                         <PickupCountdown claimedAt={activeClaim.claimedAt} />
+                       </span>
+                     )}
                   </div>
-                  <h2 className="text-4xl font-bold font-serif mb-3 tracking-tight">{activeClaim.title}</h2>
+                  <h2 className="text-4xl font-bold font-serif mb-2 tracking-tight">{activeClaim.title}</h2>
+                  {activeClaim.description && (
+                    <p className="text-primary-200 text-sm mb-3 max-w-lg">{activeClaim.description}</p>
+                  )}
                   <div className="flex items-center gap-6 text-xs font-bold uppercase tracking-widest text-primary-200">
                     <p className="flex items-center gap-2"><Leaf size={16} className="text-accent-400"/> Capacity: {activeClaim.capacity} Meals</p>
                     <p className="flex items-center gap-2"><MapPin size={16} className="text-accent-400"/> Pickup Location</p>
@@ -376,8 +472,8 @@ const NgoDashboard = () => {
                 </div>
                 <div className="flex items-center gap-3">
                    <div className="flex bg-slate-100 p-1.5 rounded-lg border border-slate-200">
-                      <button onClick={() => setViewMode('grid')} className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white shadow-md text-primary-700' : 'text-slate-400 hover:text-slate-600'}`}><Grid size={18}/></button>
-                      <button onClick={() => setViewMode('map')} className={`p-2 rounded-md transition-all ${viewMode === 'map' ? 'bg-white shadow-md text-primary-700' : 'text-slate-400 hover:text-slate-600'}`}><MapIcon size={18}/></button>
+                      <button onClick={() => setViewMode('grid')} aria-label="Grid view" className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white shadow-md text-primary-700' : 'text-slate-400 hover:text-slate-600'}`}><Grid size={18}/></button>
+                      <button onClick={() => setViewMode('map')} aria-label="Map view" className={`p-2 rounded-md transition-all ${viewMode === 'map' ? 'bg-white shadow-md text-primary-700' : 'text-slate-400 hover:text-slate-600'}`}><MapIcon size={18}/></button>
                    </div>
                    <div className="flex items-center gap-2 bg-primary-950 px-4 py-2.5 rounded-lg text-white shadow-lg">
                       <span className="relative flex h-2 w-2">
@@ -387,6 +483,59 @@ const NgoDashboard = () => {
                       <span className="text-[10px] font-bold uppercase tracking-widest">Live Updates</span>
                    </div>
                 </div>
+              </div>
+
+              {/* Search & Filter Bar */}
+              <div className="flex flex-col sm:flex-row gap-3 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <input
+                  type="text"
+                  placeholder="Search by food name..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-1 focus:ring-primary-500 transition-colors"
+                />
+                <input
+                  type="number"
+                  placeholder="Min meals"
+                  value={minCapacity}
+                  onChange={(e) => setMinCapacity(e.target.value)}
+                  min="1"
+                  className="w-32 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-1 focus:ring-primary-500 transition-colors"
+                />
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-1 focus:ring-primary-500 transition-colors"
+                >
+                  <option value="newest">Newest first</option>
+                  <option value="largest">Most meals first</option>
+                  <option value="smallest">Fewest meals first</option>
+                </select>
+                {(searchQuery || minCapacity) && (
+                  <button
+                    onClick={() => { setSearchQuery(''); setMinCapacity(''); }}
+                    className="px-4 py-2.5 text-xs font-bold text-slate-500 hover:text-slate-700 uppercase tracking-widest"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+
+              {/* Radius Slider */}
+              <div className="flex items-center gap-4 bg-white px-5 py-3 rounded-xl border border-slate-200 shadow-sm">
+                <SlidersHorizontal size={16} className="text-slate-400 shrink-0" />
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest shrink-0">Search Radius</span>
+                <input
+                  type="range"
+                  min="5"
+                  max="50"
+                  step="5"
+                  value={radius}
+                  onChange={(e) => handleRadiusChange(parseInt(e.target.value))}
+                  className="flex-1 accent-primary-700"
+                  aria-label="Search radius in km"
+                />
+                <span className="text-sm font-bold text-primary-700 w-14 text-right shrink-0">{radius} km</span>
               </div>
               
               {isLoading ? (
@@ -400,42 +549,75 @@ const NgoDashboard = () => {
                  </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {donations.length > 0 ? donations.map(d => (
+                {filteredDonations.length > 0 ? filteredDonations.map(d => (
                   <div key={d.id} className="structured-card overflow-hidden flex flex-col group hover:border-primary-400 transition-all bg-white rounded-xl shadow-sm">
                     <div className="relative h-56 border-b border-slate-100 bg-slate-100 overflow-hidden">
-                       <img src={d.photoUrl || "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?q=80&w=800"} alt="Surplus Batch" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
-                       <div className="absolute top-4 left-4">
+                       <img src={d.photoUrl || "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?q=80&w=800"} alt={d.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                       <div className="absolute top-4 left-4 flex gap-2">
                           <span className="px-3 py-1.5 bg-primary-950/90 backdrop-blur-md text-white rounded-md text-[10px] font-bold uppercase tracking-widest border border-white/20">
-                            Cap: {d.capacity} Meals
+                            {d.capacity} meals
                           </span>
+                          {d.createdAt && (Date.now() - new Date(d.createdAt)) > 60 * 60 * 1000 && (
+                            <span className="px-2 py-1.5 bg-red-500/90 backdrop-blur-md text-white rounded-md text-[10px] font-bold uppercase tracking-widest">
+                              Expiring Soon
+                            </span>
+                          )}
                        </div>
                     </div>
                     <div className="p-6 flex-1 flex flex-col">
-                      <div className="mb-6">
-                         <h3 className="text-xl font-bold text-slate-900 line-clamp-1 mb-2 font-serif">{d.title}</h3>
+                      <div className="mb-4">
+                         <h3 className="text-xl font-bold text-slate-900 line-clamp-1 mb-1 font-serif">{d.title}</h3>
+                         {d.description && (
+                           <p className="text-xs text-slate-500 line-clamp-2 mb-2">{d.description}</p>
+                         )}
                          <div className="flex items-center justify-between">
                             <p className="text-slate-400 text-[10px] font-bold flex items-center gap-1.5 uppercase tracking-widest">
-                               <MapPin size={12} className="text-primary-600"/> NY Metropolitan Sector
+                               <MapPin size={12} className="text-primary-600"/> Nearby
                             </p>
-                            <span className="text-[10px] font-bold text-slate-300 uppercase underline decoration-primary-300/50 underline-offset-4 cursor-help">Logistics Details</span>
+                            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+                               {d.createdAt ? (() => {
+                                 const mins = Math.floor((Date.now() - new Date(d.createdAt)) / 60000);
+                                 if (mins < 1) return 'Just now';
+                                 if (mins < 60) return `${mins}m ago`;
+                                 return `${Math.floor(mins / 60)}h ago`;
+                               })() : ''}
+                            </p>
                          </div>
                       </div>
-                      <button onClick={() => handleClaim(d.id)} className="mt-auto w-full py-4 bg-primary-900 text-white rounded-lg font-bold hover:bg-primary-950 transition-all flex justify-between items-center px-6 shadow-md uppercase tracking-widest text-[10px]">
-                        Claim Donation <ChevronRight size={16} />
-                      </button>
+                      <div className="flex gap-2 mt-auto">
+                        <button
+                          onClick={() => setDetailDonation(d)}
+                          className="flex-1 py-3 border border-slate-200 text-slate-600 rounded-lg font-bold hover:bg-slate-50 transition-all text-[10px] uppercase tracking-widest"
+                        >
+                          View Details
+                        </button>
+                        <button onClick={() => handleClaim(d.id)} className="flex-1 py-3 bg-primary-900 text-white rounded-lg font-bold hover:bg-primary-950 transition-all flex justify-center items-center gap-2 shadow-md uppercase tracking-widest text-[10px]">
+                          Claim <ChevronRight size={14} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )) : (
                    <div className="md:col-span-2 py-32 text-center bg-white rounded-xl border border-dashed border-slate-200 p-12">
                       <Info className="w-16 h-16 text-slate-200 mx-auto mb-6" />
-                      <h4 className="text-xl font-bold font-serif text-slate-900 mb-2">No Donations Nearby</h4>
-                      <p className="text-slate-500 max-w-sm mx-auto leading-relaxed">No food donations are available in your area right now. We'll notify you when something comes in.</p>
+                      {searchQuery || minCapacity ? (
+                        <>
+                          <h4 className="text-xl font-bold font-serif text-slate-900 mb-2">No matches found</h4>
+                          <p className="text-slate-500 max-w-sm mx-auto leading-relaxed mb-4">Try adjusting your search or filters.</p>
+                          <button onClick={() => { setSearchQuery(''); setMinCapacity(''); }} className="text-sm font-bold text-primary-700 hover:underline">Clear filters</button>
+                        </>
+                      ) : (
+                        <>
+                          <h4 className="text-xl font-bold font-serif text-slate-900 mb-2">No Donations Nearby</h4>
+                          <p className="text-slate-500 max-w-sm mx-auto leading-relaxed">No food donations are available in your area right now. We'll notify you when something comes in.</p>
+                        </>
+                      )}
                    </div>
                 )}
-              </div>
+                </div>
+              )}
               {claimError && (
                 <p className="text-sm text-red-600 text-center mt-4 font-medium">{claimError}</p>
-              )}
               )}
             </div>
           )}
@@ -475,7 +657,19 @@ const NgoDashboard = () => {
               </div>
               
               <div className="mt-10 pt-6 border-t border-slate-100">
-                 <button className="w-full py-4 bg-slate-900 text-white rounded-lg font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-slate-800 transition-all shadow-md group">
+                 <button
+                   onClick={() => {
+                     const csv = ['Title,Capacity,Status,Date']
+                       .concat(history.map(d => `"${d.title}",${d.capacity},${d.status},"${new Date(d.createdAt).toLocaleDateString()}"`))
+                       .join('\n');
+                     const blob = new Blob([csv], { type: 'text/csv' });
+                     const url = URL.createObjectURL(blob);
+                     const a = document.createElement('a');
+                     a.href = url; a.download = 'pickup-history.csv'; a.click();
+                     URL.revokeObjectURL(url);
+                   }}
+                   className="w-full py-4 bg-slate-900 text-white rounded-lg font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-slate-800 transition-all shadow-md group"
+                 >
                     Download Report <ChevronRight className="inline-block ml-1 group-hover:translate-x-1 transition-transform" size={14} />
                  </button>
                  <p className="text-[9px] text-slate-400 font-medium text-center mt-4">Pickup history</p>

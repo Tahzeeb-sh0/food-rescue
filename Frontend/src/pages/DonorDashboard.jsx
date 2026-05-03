@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import ChatBox from '../components/ChatBox';
 import MapView from '../components/MapView';
+import DonationDetailModal from '../components/DonationDetailModal';
 import { 
   Heart, 
   PlusCircle, 
   CheckCircle, 
   History,
-  ChevronRight,
   Clock,
   Package,
   Info,
@@ -23,8 +23,137 @@ import {
   Loader2,
   Camera,
   AlertCircle,
-  Utensils
+  Utensils,
+  Star,
+  Share2
 } from 'lucide-react';
+
+// ── Star Rating Component ──────────────────────────────────────────────────────
+const StarRating = ({ value, onChange }) => (
+  <div className="flex gap-1">
+    {[1, 2, 3, 4, 5].map((star) => (
+      <button
+        key={star}
+        type="button"
+        onClick={() => onChange(star)}
+        className="transition-transform hover:scale-110"
+        aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+      >
+        <Star
+          size={28}
+          className={star <= value ? 'text-accent-500 fill-accent-500' : 'text-slate-300'}
+        />
+      </button>
+    ))}
+  </div>
+);
+
+// ── Rating Modal ───────────────────────────────────────────────────────────────
+const RatingModal = ({ donation, currentUser, onClose, onSubmitted }) => {
+  const [score, setScore] = useState(0);
+  const [comment, setComment] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (score === 0) { setError('Please select a rating.'); return; }
+    setIsSubmitting(true);
+    setError('');
+    try {
+      const res = await fetch('http://localhost:8080/api/ratings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          donationId: donation.id,
+          donorId: currentUser.id,
+          ngoId: donation.claimedByNgoId,
+          score,
+          comment,
+        }),
+      });
+      if (res.ok || res.status === 400) {
+        // 400 = already rated, treat as success
+        onSubmitted(donation.id);
+        onClose();
+      } else {
+        setError('Could not submit rating. Please try again.');
+      }
+    } catch {
+      // Offline — still close gracefully
+      onSubmitted(donation.id);
+      onClose();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 relative animate-in fade-in zoom-in-95 duration-200">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-600 transition-colors"
+          aria-label="Close"
+        >
+          <X size={20} />
+        </button>
+
+        <div className="text-center mb-6">
+          <div className="w-14 h-14 bg-accent-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Star size={28} className="text-accent-500" />
+          </div>
+          <h2 className="text-xl font-bold font-serif text-slate-900 mb-1">Rate this Pickup</h2>
+          <p className="text-sm text-slate-500">How did the NGO do with <span className="font-semibold text-slate-700">"{donation.title}"</span>?</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="flex justify-center">
+            <StarRating value={score} onChange={setScore} />
+          </div>
+          {score > 0 && (
+            <p className="text-center text-xs font-bold text-slate-500 uppercase tracking-widest">
+              {['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent'][score]}
+            </p>
+          )}
+
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
+              Comment (optional)
+            </label>
+            <textarea
+              rows={3}
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              maxLength={500}
+              placeholder="How was the pickup experience?"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-1 focus:ring-primary-500 resize-none"
+            />
+          </div>
+
+          {error && <p className="text-sm text-red-600 text-center">{error}</p>}
+
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-3 border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              Skip
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1 py-3 bg-primary-700 text-white rounded-xl text-sm font-bold hover:bg-primary-800 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+            >
+              {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : 'Submit Rating'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
 
 const DonorDashboard = () => {
   const [activeTab, setActiveTab] = useState('active');
@@ -37,8 +166,13 @@ const DonorDashboard = () => {
   const [showForm, setShowForm] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [user, setUser] = useState(null);
+  const [ratingTarget, setRatingTarget] = useState(null); // donation to rate
+  const [ratedIds, setRatedIds] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('ratedDonations') || '[]'); } catch { return []; }
+  });
   const photoInputRef = useRef(null);
   
   useEffect(() => {
@@ -106,7 +240,6 @@ const DonorDashboard = () => {
       return;
     }
 
-    // Convert photo to base64 if provided, otherwise use placeholder
     let photoUrl = 'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?auto=format&fit=crop&q=80&w=800';
     if (photoFile) {
       photoUrl = await new Promise((resolve) => {
@@ -116,6 +249,7 @@ const DonorDashboard = () => {
       });
     }
 
+    setIsSubmitting(true);
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
@@ -148,9 +282,12 @@ const DonorDashboard = () => {
           }
         } catch {
           setSubmitError('Could not connect to server. Please try again.');
+        } finally {
+          setIsSubmitting(false);
         }
       },
       () => {
+        setIsSubmitting(false);
         setSubmitError('Location access was denied. Please allow location access to post a donation.');
       }
     );
@@ -176,6 +313,19 @@ const DonorDashboard = () => {
 
   return (
     <DashboardLayout role="DONOR">
+      {/* Rating Modal */}
+      {ratingTarget && user && (
+        <RatingModal
+          donation={ratingTarget}
+          currentUser={user}
+          onClose={() => setRatingTarget(null)}
+          onSubmitted={(id) => {
+            const updated = [...ratedIds, id];
+            setRatedIds(updated);
+            localStorage.setItem('ratedDonations', JSON.stringify(updated));
+          }}
+        />
+      )}
       
       {/* 1. OPERATIONS HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
@@ -295,8 +445,8 @@ const DonorDashboard = () => {
                     </button>
                   )}
                 </div>
-                <button type="submit" className="w-full py-5 bg-primary-700 text-white rounded-xl font-bold hover:bg-primary-800 shadow-xl transition-all uppercase tracking-[0.2em] text-xs active:scale-[0.98]">
-                  Post Donation
+                <button type="submit" disabled={isSubmitting} className="w-full py-5 bg-primary-700 text-white rounded-xl font-bold hover:bg-primary-800 shadow-xl transition-all uppercase tracking-[0.2em] text-xs active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2">
+                  {isSubmitting ? <><Loader2 className="animate-spin" size={16}/> Posting...</> : 'Post Donation'}
                 </button>
                 {submitError && (
                   <p className="text-sm text-red-600 text-center">{submitError}</p>
@@ -434,9 +584,46 @@ const DonorDashboard = () => {
                <div className="h-full animate-in fade-in slide-in-from-right-4 duration-500">
                   <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-4">
                      <h3 className="font-bold font-serif text-slate-900 text-lg">Donation History</h3>
-                     <button className="text-[10px] font-bold text-primary-700 hover:text-primary-800 uppercase tracking-widest flex items-center gap-1.5">
-                        Download ESG Audit (CSV) <FileText size={14}/>
-                     </button>
+                     <div className="flex items-center gap-4">
+                       {/* Mini 7-day activity bar chart */}
+                       {pastDonations.length > 0 && (() => {
+                         const days = Array.from({ length: 7 }, (_, i) => {
+                           const d = new Date(); d.setDate(d.getDate() - (6 - i));
+                           return d.toLocaleDateString();
+                         });
+                         const counts = days.map(day =>
+                           pastDonations.filter(d => new Date(d.completedAt).toLocaleDateString() === day).length
+                         );
+                         const max = Math.max(...counts, 1);
+                         return (
+                           <div className="flex items-end gap-1 h-8" title="Donations per day (last 7 days)">
+                             {counts.map((c, i) => (
+                               <div
+                                 key={i}
+                                 className="w-3 rounded-sm bg-primary-200 hover:bg-primary-500 transition-colors"
+                                 style={{ height: `${Math.max((c / max) * 100, 8)}%` }}
+                                 title={`${days[i]}: ${c} donation${c !== 1 ? 's' : ''}`}
+                               />
+                             ))}
+                           </div>
+                         );
+                       })()}
+                       <button
+                         onClick={() => {
+                           const csv = ['Title,Capacity,Completed Date']
+                             .concat(pastDonations.map(d => `"${d.title}",${d.capacity},"${new Date(d.completedAt).toLocaleDateString()}"`))
+                             .join('\n');
+                           const blob = new Blob([csv], { type: 'text/csv' });
+                           const url = URL.createObjectURL(blob);
+                           const a = document.createElement('a');
+                           a.href = url; a.download = 'donation-history.csv'; a.click();
+                           URL.revokeObjectURL(url);
+                         }}
+                         className="text-[10px] font-bold text-primary-700 hover:text-primary-800 uppercase tracking-widest flex items-center gap-1.5"
+                       >
+                          Export CSV <FileText size={14}/>
+                       </button>
+                     </div>
                   </div>
                   {pastDonations.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -446,16 +633,24 @@ const DonorDashboard = () => {
                              <div className="w-10 h-10 bg-green-50 text-green-600 rounded-xl flex items-center justify-center border border-green-100 group-hover:bg-green-600 group-hover:text-white transition-all">
                                 <CheckCircle size={20} />
                              </div>
-                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">NODE_{item.id.slice(-6)}</span>
+                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">#{item.id.slice(-6)}</span>
                           </div>
                           <h4 className="font-bold font-serif text-slate-900 mb-2 group-hover:text-primary-700 transition-colors">{item.title}</h4>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-6">{new Date(item.completedAt).toLocaleDateString()}</p>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-4">{new Date(item.completedAt).toLocaleDateString()}</p>
                           <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
-                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Handled {item.capacity} Meals</p>
-                             <div className="text-primary-700 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <span className="text-[10px] font-bold uppercase tracking-widest">Details</span>
-                                <ChevronRight size={14} />
-                             </div>
+                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{item.capacity} Meals</p>
+                             {item.claimedByNgoId && !ratedIds.includes(item.id) ? (
+                               <button
+                                 onClick={() => setRatingTarget(item)}
+                                 className="flex items-center gap-1 text-[10px] font-bold text-accent-600 hover:text-accent-700 uppercase tracking-widest transition-colors"
+                               >
+                                 <Star size={12} className="fill-accent-500" /> Rate NGO
+                               </button>
+                             ) : ratedIds.includes(item.id) ? (
+                               <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest flex items-center gap-1">
+                                 <CheckCircle size={12} /> Rated
+                               </span>
+                             ) : null}
                           </div>
                         </div>
                       ))}

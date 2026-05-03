@@ -35,8 +35,7 @@ const NetworkPage = () => {
         }));
         setNgos(formattedNgos);
       })
-      .catch(err => {
-        console.error("Backend offline, using fallback data for demonstration.");
+      .catch(() => {
         setNgos([
           { id: 'NGO-001', name: 'City Harvest Coalition', type: 'High Volume Logistical', location: 'New York Area', capacity: '10,000 Meals/Day', status: 'Active Verified' },
           { id: 'NGO-002', name: 'Suburban Meal Network', type: 'Community Distribution', location: 'Tri-State Corridors', capacity: '2,500 Meals/Day', status: 'Active Verified' },

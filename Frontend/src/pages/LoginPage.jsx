@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Lock, LogIn, ArrowLeft, Loader2 } from 'lucide-react';
+import { Phone, Lock, LogIn, ArrowLeft, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const LoginPage = () => {
@@ -55,14 +55,15 @@ const LoginPage = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-lg shadow-sm border border-slate-200">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Official Contact Phone</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Phone Number</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-slate-400" />
+                  <Phone className="h-5 w-5 text-slate-400" />
                 </div>
                 <input 
                   type="tel" 
                   required 
+                  autoComplete="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-colors outline-none text-slate-900" 
@@ -80,6 +81,7 @@ const LoginPage = () => {
                 <input 
                   type="password" 
                   required 
+                  autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-colors outline-none text-slate-900" 
@@ -117,7 +119,7 @@ const LoginPage = () => {
           </form>
           
           <p className="mt-8 text-xs text-slate-500 text-center leading-relaxed max-w-sm mx-auto">
-            By logging in, you agree to our strictly enforced <Link to="/terms" className="underline">Terms of Service</Link> regarding food safety and handling.
+            By logging in, you agree to our <Link to="/terms" className="underline">Terms of Service</Link>.
           </p>
         </div>
       </div>

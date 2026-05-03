@@ -104,6 +104,7 @@ const DonorRegisterPage = () => {
                      <input 
                         type="tel" 
                         required 
+                        autoComplete="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 outline-none text-slate-900 text-sm bg-slate-50" 
@@ -120,6 +121,8 @@ const DonorRegisterPage = () => {
                 <input 
                   type="password" 
                   required 
+                  minLength={8}
+                  autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded focus:ring-1 focus:ring-primary-500 outline-none text-slate-900 text-sm bg-slate-50" 
@@ -141,7 +144,7 @@ const DonorRegisterPage = () => {
             <div className="flex items-start mt-6 p-4 bg-slate-50 border border-slate-200 rounded">
                <input id="director-cert" type="checkbox" className="h-4 w-4 text-primary-600 border-slate-300 rounded mt-0.5" required/>
                <label htmlFor="director-cert" className="ml-3 block text-sm text-slate-600 leading-relaxed font-medium">
-                 I certify that I am authorized to bind this facility to the <Link to="/terms" className="text-primary-700 font-bold hover:underline">SLA Framework</Link> regarding food safety compliance.
+                 I agree to the <Link to="/terms" className="text-primary-700 font-bold hover:underline">Terms of Service</Link> and confirm this facility will follow food safety guidelines.
                </label>
             </div>
 
@@ -153,6 +156,7 @@ const DonorRegisterPage = () => {
               >
                  {isLoading ? <Loader2 className="animate-spin" size={18}/> : 'Create Account'}
               </button>
+              {error && <p className="text-sm text-red-600 text-center mt-3">{error}</p>}
             </div>
             
             <p className="mt-8 text-center text-sm text-slate-500 font-medium pb-12">

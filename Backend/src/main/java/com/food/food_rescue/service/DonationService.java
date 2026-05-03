@@ -131,6 +131,24 @@ public class DonationService {
         messagingTemplate.convertAndSend("/topic/donations/cancelled", donationId);
     }
 
+    public Donation updateDonation(String donationId, String donorId, String title, String description, int capacity) {
+        Donation donation = donationRepository.findById(donationId)
+                .orElseThrow(() -> new RuntimeException("Donation not found"));
+
+        if (!donorId.equals(donation.getDonorId())) {
+            throw new RuntimeException("Only the donor can edit this donation");
+        }
+
+        if (donation.getStatus() != DonationStatus.AVAILABLE) {
+            throw new RuntimeException("Only available donations can be edited");
+        }
+
+        donation.setTitle(title);
+        donation.setDescription(description);
+        donation.setCapacity(capacity);
+        return donationRepository.save(donation);
+    }
+
     private String generateConfirmationCode() {
         return String.format("%06d", SECURE_RANDOM.nextInt(1_000_000));
     }

@@ -3,6 +3,7 @@ package com.food.food_rescue.controller;
 import com.food.food_rescue.dto.ClaimRequest;
 import com.food.food_rescue.dto.CompleteRequest;
 import com.food.food_rescue.dto.DonationRequest;
+import com.food.food_rescue.dto.UpdateDonationRequest;
 import com.food.food_rescue.model.Donation;
 import com.food.food_rescue.service.DonationService;
 import jakarta.validation.Valid;
@@ -75,5 +76,12 @@ public class DonationController {
                                                @RequestParam String donorId) {
         donationService.cancelDonation(id, donorId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Donation> updateDonation(@PathVariable String id,
+                                                    @RequestParam String donorId,
+                                                    @Valid @RequestBody UpdateDonationRequest request) {
+        return ResponseEntity.ok(donationService.updateDonation(id, donorId, request.getTitle(), request.getDescription(), request.getCapacity()));
     }
 }

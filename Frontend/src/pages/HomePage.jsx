@@ -22,19 +22,21 @@ const HomePage = () => {
   const [stats, setStats] = useState({ meals: 0, co2: 0, ngos: 0 });
 
   useEffect(() => {
-    // Sync with backend for real stats (Mocking for now as the endpoint returns specific types)
     fetch('http://localhost:8080/api/stats/impact')
       .then(res => res.json())
       .then(data => setStats({
-        meals: data.totalMealsRescued || 1240482,
-        co2: data.co2DivertedKg / 1000 || 2480.9,
-        ngos: 8402
-      }));
+        meals: data.totalMeals || 0,
+        co2: data.co2DivertedTons || 0,
+        ngos: data.activeNgos || 0
+      }))
+      .catch(() => {
+        // Keep zeros on error — don't show fake data
+      });
 
     const interval = setInterval(() => {
       setStats(prev => ({
         ...prev,
-        meals: prev.meals + Math.floor(Math.random() * 2),
+        meals: prev.meals > 0 ? prev.meals + Math.floor(Math.random() * 2) : prev.meals,
       }));
     }, 8000);
     return () => clearInterval(interval);
@@ -82,7 +84,7 @@ const HomePage = () => {
                <div className="flex -space-x-3">
                   {[1,2,3,4].map(i => (
                     <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-slate-200">
-                       <img src={`https://i.pravatar.cc/100?img=${i+14}`} className="rounded-full" />
+                       <img src={`https://i.pravatar.cc/100?img=${i+14}`} className="rounded-full" alt="" />
                     </div>
                   ))}
                </div>
@@ -221,12 +223,12 @@ const HomePage = () => {
                <div className="grid md:grid-cols-2 gap-6">
                   <div className="p-10 bg-primary-800/50 backdrop-blur-sm rounded-3xl border border-primary-700 text-center">
                      <h3 className="text-5xl font-bold mb-3 font-mono">
-                        {Math.floor(stats.meals / 1000).toLocaleString()}k
+                        {stats.meals > 0 ? `${Math.floor(stats.meals / 1000).toLocaleString()}k` : '—'}
                      </h3>
                      <p className="text-xs font-bold text-primary-300 uppercase tracking-widest">Meals Shared</p>
                   </div>
                   <div className="p-10 bg-accent-600/50 backdrop-blur-sm rounded-3xl border border-accent-500 text-center">
-                     <h3 className="text-5xl font-bold mb-3 font-mono">8.4k</h3>
+                     <h3 className="text-5xl font-bold mb-3 font-mono">{stats.ngos > 0 ? `${stats.ngos.toLocaleString()}` : '—'}</h3>
                      <p className="text-xs font-bold text-accent-100 uppercase tracking-widest">Partner NGOs</p>
                   </div>
                   <div className="md:col-span-2 p-12 bg-white/5 rounded-3xl border border-white/10 text-center">

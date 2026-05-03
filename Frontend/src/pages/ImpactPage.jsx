@@ -3,20 +3,23 @@ import { ShieldCheck, HeartPulse, Globe2, ArrowRight, FileText, Loader2 } from '
 import { Link } from 'react-router-dom';
 
 const ImpactPage = () => {
-  const [stats, setStats] = useState({ totalMeals: '12.5M', activeNgos: '8,400', co2DivertedTons: '45k' });
+  const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetch('http://localhost:8080/api/stats/impact')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('Failed');
+        return res.json();
+      })
       .then(data => {
         setStats({
           totalMeals: data.totalMeals.toLocaleString(),
           activeNgos: data.activeNgos.toLocaleString(),
-          co2DivertedTons: data.co2DivertedTons.toLocaleString() + 'T'
+          co2DivertedTons: data.co2DivertedTons.toLocaleString() + ' T'
         });
       })
-      .catch(err => console.warn("Using fallback static stats for Impact Page."))
+      .catch(() => setStats(null))
       .finally(() => setIsLoading(false));
   }, []);
   return (
@@ -45,21 +48,21 @@ const ImpactPage = () => {
             <div className="flex flex-col items-start justify-center text-left sm:pr-8">
               <dt className="text-sm font-semibold text-slate-500 uppercase tracking-widest mb-3">Meals Rescued</dt>
               <dd className="text-5xl lg:text-6xl font-bold font-serif text-primary-700 mb-2">
-                {isLoading ? <Loader2 className="animate-spin text-primary-200" size={40}/> : stats.totalMeals}
+                {isLoading ? <Loader2 className="animate-spin text-primary-200" size={40}/> : stats ? stats.totalMeals : '—'}
               </dd>
               <span className="text-sm text-slate-400 font-medium border-t border-slate-100 pt-3 w-full">Independently Verified</span>
             </div>
             <div className="flex flex-col items-start justify-center text-left sm:px-8 pt-10 sm:pt-0">
               <dt className="text-sm font-semibold text-slate-500 uppercase tracking-widest mb-3">Active NGOs</dt>
               <dd className="text-5xl lg:text-6xl font-bold font-serif text-slate-800 mb-2">
-                {isLoading ? <Loader2 className="animate-spin text-slate-200" size={40}/> : stats.activeNgos}
+                {isLoading ? <Loader2 className="animate-spin text-slate-200" size={40}/> : stats ? stats.activeNgos : '—'}
               </dd>
               <span className="text-sm text-slate-400 font-medium border-t border-slate-100 pt-3 w-full">Across 42 Countries</span>
             </div>
             <div className="flex flex-col items-start justify-center text-left sm:pl-8 pt-10 sm:pt-0">
               <dt className="text-sm font-semibold text-slate-500 uppercase tracking-widest mb-3">CO2 Diverted</dt>
               <dd className="text-5xl lg:text-6xl font-bold font-serif text-slate-800 mb-2">
-                {isLoading ? <Loader2 className="animate-spin text-slate-200" size={40}/> : stats.co2DivertedTons}
+                {isLoading ? <Loader2 className="animate-spin text-slate-200" size={40}/> : stats ? stats.co2DivertedTons : '—'}
               </dd>
               <span className="text-sm text-slate-400 font-medium border-t border-slate-100 pt-3 w-full">Methane Emissions Prevented</span>
             </div>
@@ -106,10 +109,10 @@ const ImpactPage = () => {
       {/* CTA Layer */}
       <div className="bg-primary-950 py-20 text-center">
         <div className="mx-auto max-w-3xl px-6">
-            <h2 className="text-3xl font-bold font-serif text-white mb-6">Establish a Corporate Partnership</h2>
-            <p className="text-primary-200 mb-8 max-w-xl mx-auto">Engage your corporate social responsibility arm directly by integrating your cafeteria surplus with our API.</p>
+            <h2 className="text-3xl font-bold font-serif text-white mb-6">Start Donating Food Today</h2>
+            <p className="text-primary-200 mb-8 max-w-xl mx-auto">Join thousands of businesses already reducing food waste and feeding communities.</p>
             <Link to="/donor/register" className="btn-accent gap-2">
-               Partner With Us <ArrowRight size={18}/>
+               Get Started <ArrowRight size={18}/>
             </Link>
         </div>
       </div>
