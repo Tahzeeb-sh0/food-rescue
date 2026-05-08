@@ -1,0 +1,55 @@
+package com.food.food_rescue.service;
+
+import com.food.food_rescue.model.Donation;
+import com.food.food_rescue.model.DonationStatus;
+import com.food.food_rescue.repository.DonationRepository;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * Automatically expires AVAILABLE donations that have not been claimed
+ * within the configured window (default: 4 hours).
+ */
+@Service
+@RequiredArgsConstructor
+public class DonationExpiryService {
+
+    private static final Logger log = LoggerFactory.getLogger(DonationExpiryService.class);
+    private static final int EXPIRY_HOURS = 4;
+
+    private final DonationRepository donationRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+
+    /**
+     * Runs every 15 minutes. Finds AVAILABLE donations older than EXPIRY_HOURS
+     * and deletes them, broadcasting a cancellation event so connected NGO
+     * dashboards remove the card in real time.
+     */
+    @Scheduled(fixedDelay = 15 * 60 * 1000) // every 15 minutes
+    public void expireOldDonations() {
+        LocalDateTime cutoff = LocalDateTime.now().minusHours(EXPIRY_HOURS);
+
+        List<Donation> expired = donationRepository.findByStatus(DonationStatus.AVAILABLE)
+                .stream()
+                .filter(d -> d.getCreatedAt() != null && d.getCreatedAt().isBefore(cutoff))
+                .toList();
+
+        if (expired.isEmpty()) return;
+
+        log.info("Expiring {} unclaimed donation(s) older than {} hours", expired.size(), EXPIRY_HOURS);
+
+        for (Donation d : expired) {
+            donationRepository.delete(d);
+            // Notify connected clients so the card disappears from NGO dashboards
+            messagingTemplate.convertAndSend("/topic/donations/cancelled", d.getId());
+            log.info("Expired donation id={} title='{}'", d.getId(), d.getTitle());
+        }
+    }
+}

@@ -31,6 +31,7 @@ import ProfilePage from "../pages/ProfilePage";
 import SettingsPage from "../pages/SettingsPage";
 import CompliancePage from "../pages/CompliancePage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
+import LeaderboardPage from "../pages/LeaderboardPage";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 
 const Router = () => {
@@ -48,6 +49,7 @@ const Router = () => {
           <Route path="/network" element={<NetworkPage />} />
           <Route path="/careers" element={<CareersPage />} />
           <Route path="/help" element={<HelpCenterPage />} />
+          <Route path="/leaderboard" element={<LeaderboardPage />} />
 
           {/* New Footer Pages */}
           <Route path="/reports" element={<ReportsPage />} />

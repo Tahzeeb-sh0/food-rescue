@@ -197,6 +197,12 @@ const NgoDashboard = () => {
         // Dismiss alert for this donation if it's still showing
         dismissAlert(claimed.id);
       });
+      client.subscribe('/topic/donations/cancelled', (msg) => {
+        // Donation was cancelled by donor or auto-expired — remove from grid
+        const cancelledId = JSON.parse(msg.body);
+        setDonations(prev => prev.filter(d => d.id !== cancelledId));
+        dismissAlert(cancelledId);
+      });
       client.subscribe('/topic/donations/completed', (msg) => {
          const completed = JSON.parse(msg.body);
          if(activeClaim && activeClaim.id === completed.id) {

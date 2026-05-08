@@ -169,7 +169,9 @@ const DonorDashboard = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [user, setUser] = useState(null);
-  const [ratingTarget, setRatingTarget] = useState(null); // donation to rate
+  const [ratingTarget, setRatingTarget] = useState(null);
+  const [detailDonation, setDetailDonation] = useState(null);
+  const [copiedId, setCopiedId] = useState(null);
   const [ratedIds, setRatedIds] = useState(() => {
     try { return JSON.parse(localStorage.getItem('ratedDonations') || '[]'); } catch { return []; }
   });
@@ -215,6 +217,11 @@ const DonorDashboard = () => {
       client.subscribe('/topic/donations/completed', (msg) => {
         const d = JSON.parse(msg.body);
         setDonations(prev => prev.map(item => item.id === d.id ? d : item));
+      });
+      client.subscribe('/topic/donations/cancelled', (msg) => {
+        // Auto-expired by server — remove from active list
+        const cancelledId = JSON.parse(msg.body);
+        setDonations(prev => prev.filter(item => item.id !== cancelledId));
       });
     });
 
@@ -306,6 +313,17 @@ const DonorDashboard = () => {
     }
   };
 
+  const handleShare = (donationId) => {
+    const url = `${window.location.origin}/donation/${donationId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopiedId(donationId);
+      setTimeout(() => setCopiedId(null), 2000);
+    }).catch(() => {
+      // Fallback for browsers without clipboard API
+      prompt('Copy this link:', url);
+    });
+  };
+
   // KPIS
   const totalMeals = pastDonations.reduce((acc, curr) => acc + curr.capacity, 0);
   const activeCount = activeDonations.length;
@@ -324,6 +342,14 @@ const DonorDashboard = () => {
             setRatedIds(updated);
             localStorage.setItem('ratedDonations', JSON.stringify(updated));
           }}
+        />
+      )}
+      {/* Donation Detail Modal */}
+      {detailDonation && (
+        <DonationDetailModal
+          donation={detailDonation}
+          currentUserRole="DONOR"
+          onClose={() => setDetailDonation(null)}
         />
       )}
       
@@ -536,10 +562,29 @@ const DonorDashboard = () => {
                                         )}
                                      </div>
                                   </div>
-                                  <h3 className="text-2xl font-bold font-serif text-slate-900 mb-3">{d.title}</h3>
-                                  <div className="flex items-center gap-6 text-xs font-bold text-slate-500 uppercase tracking-widest mb-8">
+                                  <h3 className="text-2xl font-bold font-serif text-slate-900 mb-1">{d.title}</h3>
+                                  {d.description && (
+                                    <p className="text-xs text-slate-500 mb-3">{d.description}</p>
+                                  )}
+                                  <div className="flex items-center gap-6 text-xs font-bold text-slate-500 uppercase tracking-widest mb-6">
                                      <span className="flex items-center gap-2"><Utensils size={14} className="text-primary-700"/> {d.capacity} Meals</span>
                                      <span className="flex items-center gap-2"><Clock size={14} className="text-primary-700"/> {new Date(d.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                  </div>
+                                  <div className="flex gap-2 mb-4">
+                                    <button
+                                      onClick={() => setDetailDonation(d)}
+                                      className="flex-1 py-2 border border-slate-200 text-slate-600 rounded-lg text-[10px] font-bold hover:bg-slate-50 transition-colors uppercase tracking-widest"
+                                    >
+                                      View Details
+                                    </button>
+                                    <button
+                                      onClick={() => handleShare(d.id)}
+                                      className="px-3 py-2 border border-slate-200 text-slate-500 rounded-lg hover:bg-slate-50 transition-colors"
+                                      aria-label="Copy share link"
+                                      title="Copy share link"
+                                    >
+                                      {copiedId === d.id ? <CheckCircle size={14} className="text-green-500" /> : <Share2 size={14} />}
+                                    </button>
                                   </div>
 
                                   {d.status === 'CLAIMED' ? (

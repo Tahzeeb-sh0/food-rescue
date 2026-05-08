@@ -30,6 +30,7 @@ const Footer = () => {
         { name: 'How It Works', path: '/howitworks' },
         { name: 'Impact Report', path: '/impact' },
         { name: 'Our Network', path: '/network' },
+        { name: 'Leaderboard', path: '/leaderboard' },
         { name: 'Safety Standards', path: '/safety' },
       ],
     },
