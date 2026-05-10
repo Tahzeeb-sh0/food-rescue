@@ -1,7 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Heart, History, Settings, LogOut, Menu, X, User, ShieldCheck, Globe } from 'lucide-react';
+import { LayoutDashboard, Heart, History, Settings, LogOut, Menu, X, User, ShieldCheck, Globe, Bell } from 'lucide-react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import NotificationCenter from '../NotificationCenter';
+
+// Internal helper — must be defined before DashboardLayout (const TDZ)
+const Building = ({ size, className }) => (
+  <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+    <line x1="9" y1="22" x2="9" y2="18"></line>
+    <line x1="15" y1="22" x2="15" y2="18"></line>
+    <line x1="18" y1="6" x2="18" y2="6"></line>
+    <line x1="18" y1="10" x2="18" y2="10"></line>
+    <line x1="18" y1="14" x2="18" y2="14"></line>
+    <line x1="6" y1="6" x2="6" y2="6"></line>
+    <line x1="6" y1="10" x2="6" y2="10"></line>
+    <line x1="6" y1="14" x2="6" y2="14"></line>
+  </svg>
+);
 
 const DashboardLayout = ({ children, role }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -120,8 +135,8 @@ const DashboardLayout = ({ children, role }) => {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="h-24 bg-white/80 backdrop-blur-md border-b border-slate-200/50 flex items-center justify-between px-8 sm:px-12 sticky top-0 z-30 transition-all">
+      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
+        <header className="h-20 sm:h-24 bg-white/80 backdrop-blur-md border-b border-slate-200/50 flex items-center justify-between px-4 sm:px-8 lg:px-12 sticky top-0 z-30 transition-all">
           <div className="flex items-center gap-6">
             <button 
               className="lg:hidden p-2.5 bg-slate-100 rounded-xl text-slate-600 hover:bg-slate-200 focus:outline-none transition-colors"
@@ -155,8 +170,8 @@ const DashboardLayout = ({ children, role }) => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-8 sm:p-12 pb-32">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-8 lg:p-12 pb-24 lg:pb-32">
+          <div className="max-w-7xl mx-auto w-full">
             {children}
           </div>
         </main>
@@ -164,8 +179,5 @@ const DashboardLayout = ({ children, role }) => {
     </div>
   );
 };
-
-// Internal Import helper for Building icon
-const Building = ({size, className}) => <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="9" y1="22" x2="9" y2="18"></line><line x1="15" y1="22" x2="15" y2="18"></line><line x1="18" y1="6" x2="18" y2="6"></line><line x1="18" y1="10" x2="18" y2="10"></line><line x1="18" y1="14" x2="18" y2="14"></line><line x1="6" y1="6" x2="6" y2="6"></line><line x1="6" y1="10" x2="6" y2="10"></line><line x1="6" y1="14" x2="6" y2="14"></line></svg>;
 
 export default DashboardLayout;

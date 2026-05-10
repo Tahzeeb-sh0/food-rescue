@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '../components/layout/DashboardLayout';
-import { Building, ShieldCheck, Mail, Phone, Save, Loader2, Camera, CheckCircle, Globe } from 'lucide-react';
+import { Building2, ShieldCheck, Phone, Save, Loader2, Camera, CheckCircle, Globe } from 'lucide-react';
 
 const API = 'http://localhost:8080';
 
@@ -94,7 +94,7 @@ const ProfilePage = () => {
                   {profileImage ? (
                     <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
-                    <Building size={48} className="text-slate-300" />
+                    <Building2 size={48} className="text-slate-300" />
                   )}
                 </div>
                 <input type="file" ref={fileInputRef} onChange={handleImageChange} className="hidden" accept="image/*" />
@@ -138,7 +138,7 @@ const ProfilePage = () => {
                     Organization Name
                   </label>
                   <div className="relative">
-                    <Building className="absolute left-3 top-3 text-slate-400" size={18} />
+                    <Building2 className="absolute left-3 top-3 text-slate-400" size={18} />
                     <input
                       type="text"
                       required

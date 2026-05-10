@@ -48,7 +48,7 @@ const ContactPage = () => {
         </p>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 mt-12 grid lg:grid-cols-3 gap-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 sm:mt-12 grid lg:grid-cols-3 gap-8 lg:gap-12">
         {/* Contact Info */}
         <div className="lg:col-span-1 space-y-8">
           <div className="structured-card p-8 bg-white">

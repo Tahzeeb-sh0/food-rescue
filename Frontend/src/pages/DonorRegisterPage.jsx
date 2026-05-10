@@ -45,7 +45,7 @@ const DonorRegisterPage = () => {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col lg:flex-row">
       {/* Left Pitch Panel */}
-      <div className="w-full lg:w-5/12 bg-primary-950 text-white flex flex-col justify-center p-10 lg:p-16 border-r border-primary-900 border-r-8 relative overflow-hidden">
+      <div className="w-full lg:w-5/12 bg-primary-950 text-white flex flex-col justify-center p-8 lg:p-16 border-r-4 border-primary-900 relative overflow-hidden min-h-[280px] lg:min-h-screen">
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary-400 via-primary-900 to-primary-950 blur-xl"></div>
         <div className="relative z-10">
           <Link to="/" className="text-2xl font-bold font-serif tracking-tight mb-8 inline-block">FoodRescue Corporate Registration</Link>

@@ -50,10 +50,10 @@ const HomePage = () => {
     <div className="bg-white overflow-x-hidden">
       
       {/* 1. HERO SECTION - Human & Impact Driven */}
-      <section className="relative min-h-[90vh] flex items-center pt-20">
+      <section className="relative min-h-[85vh] flex items-center pt-16 sm:pt-20 pb-12">
         <div className="absolute inset-x-0 top-0 h-[1000px] bg-gradient-to-b from-primary-50/30 to-white -skew-y-3 origin-top-left -z-10" />
         
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 grid lg:grid-cols-2 gap-16 items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           <div className="relative z-10">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] mb-6">
               <span className="relative flex h-2 w-2">

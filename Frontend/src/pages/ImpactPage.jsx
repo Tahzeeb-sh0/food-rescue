@@ -42,9 +42,9 @@ const ImpactPage = () => {
       </div>
 
       {/* Metrics Section - Corporate Cards */}
-      <div className="relative -mt-16 sm:-mt-20 z-10 px-6 lg:px-8 max-w-7xl mx-auto mb-20">
+      <div className="relative -mt-8 sm:-mt-16 z-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto mb-16 sm:mb-20">
         <div className="structured-card p-8 sm:p-12">
-          <dl className="grid grid-cols-1 gap-12 sm:grid-cols-3 divide-y-2 sm:divide-y-0 sm:divide-x divide-slate-200">
+          <dl className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:divide-y-0 sm:divide-x divide-slate-200 divide-y">
             <div className="flex flex-col items-start justify-center text-left sm:pr-8">
               <dt className="text-sm font-semibold text-slate-500 uppercase tracking-widest mb-3">Meals Rescued</dt>
               <dd className="text-5xl lg:text-6xl font-bold font-serif text-primary-700 mb-2">

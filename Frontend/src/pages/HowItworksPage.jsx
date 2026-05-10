@@ -46,10 +46,10 @@ const HowItworksPage = () => {
 
       <div className="py-20 bg-slate-50">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             
-            {/* Left side Image grid - Clean & Bordered */}
-            <div className="grid grid-cols-2 gap-6 relative">
+            {/* Image grid - hidden on mobile to avoid layout crush */}
+            <div className="hidden lg:grid grid-cols-2 gap-6 relative">
               <div className="aspect-[3/4] rounded bg-primary-100 overflow-hidden border border-slate-200 shadow-sm">
                  <img 
                   src="https://images.unsplash.com/photo-1618331835717-81498c8dc117?q=80&w=1000&auto=format&fit=crop" 

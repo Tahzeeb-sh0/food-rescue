@@ -22,7 +22,7 @@ const AboutPage = () => {
          </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 -mt-16 sm:-mt-20 relative z-10 mb-20">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 -mt-8 sm:-mt-16 relative z-10 mb-20">
          <div className="structured-card p-10 sm:p-14 grid md:grid-cols-2 gap-12 items-center">
             <div>
                <h2 className="text-3xl font-bold font-serif text-slate-900 mb-6">Our Foundational Mandate</h2>

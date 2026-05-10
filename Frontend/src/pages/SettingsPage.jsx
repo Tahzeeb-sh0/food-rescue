@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../components/layout/DashboardLayout';
-import { Bell, Lock, Shield, Mail, Eye, EyeOff, Save, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Bell, Lock, Shield, Eye, EyeOff, Save, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 
 const API = 'http://localhost:8080';
 
@@ -222,14 +222,14 @@ const SettingsPage = () => {
                     <button
                       type="button"
                       onClick={() => toggleNotification(n.id)}
-                      className={`w-12 h-6 rounded-full relative p-1 transition-colors shrink-0 ml-6 ${
+                      className={`w-11 h-6 rounded-full relative p-0.5 transition-colors shrink-0 ml-6 ${
                         n.active ? 'bg-primary-700' : 'bg-slate-200'
                       }`}
                       aria-label={`Toggle ${n.label}`}
                     >
                       <div
-                        className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${
-                          n.active ? 'translate-x-6' : 'translate-x-0'
+                        className={`w-5 h-5 bg-white rounded-full shadow-sm transition-transform ${
+                          n.active ? 'translate-x-5' : 'translate-x-0'
                         }`}
                       />
                     </button>

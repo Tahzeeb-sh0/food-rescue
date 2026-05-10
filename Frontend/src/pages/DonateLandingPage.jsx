@@ -6,7 +6,7 @@ const DonateLandingPage = () => {
   return (
     <div className="bg-slate-50 min-h-screen pb-24">
       {/* Corporate Pitch Header */}
-      <div className="bg-primary-950 border-b-8 border-primary-900 text-white py-24">
+      <div className="bg-primary-950 border-b-4 border-primary-900 text-white py-24">
          <div className="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-16">
             <div className="max-w-2xl">
                <div className="inline-flex items-center gap-2 px-3 py-1 rounded border border-accent-600 bg-accent-600/10 text-accent-400 text-sm font-bold uppercase tracking-widest mb-8">
@@ -22,7 +22,7 @@ const DonateLandingPage = () => {
                  <Link to="/donor/register" className="btn-accent px-8 py-4 text-center">
                     Register as a Donor
                  </Link>
-                 <Link to="/contact" className="btn-outline text-white border-primary-700 hover:bg-primary-900 bg-transparent text-center px-8 py-4">
+                 <Link to="/contact" className="inline-flex items-center justify-center px-8 py-4 border-2 border-primary-600 text-white text-base font-semibold rounded-md hover:bg-primary-900 transition-colors text-center">
                     Talk to Our Team
                  </Link>
                </div>

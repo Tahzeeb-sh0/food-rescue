@@ -143,7 +143,7 @@ class PreservationPropertyTest {
                 .andReturn();
 
         // Track for cleanup
-        Map<?, ?> response = objectMapper.readValue(result.getResponse().getContentAsString(), Map.class);
+        Map<String, Object> response = objectMapper.readValue(result.getResponse().getContentAsString(), Map.class);
         donationIdsToClean.add((String) response.get("id"));
     }
 
@@ -297,7 +297,7 @@ class PreservationPropertyTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Map<?, ?> response = objectMapper.readValue(result.getResponse().getContentAsString(), Map.class);
+        Map<String, Object> response = objectMapper.readValue(result.getResponse().getContentAsString(), Map.class);
         assertThat(response).doesNotContainKey("password");
         assertThat(response.get("phone")).isEqualTo(phone);
 
@@ -409,7 +409,7 @@ class PreservationPropertyTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Map<?, ?> response = objectMapper.readValue(result.getResponse().getContentAsString(), Map.class);
+        Map<String, Object> response = objectMapper.readValue(result.getResponse().getContentAsString(), Map.class);
         assertThat(response.get("donationId")).isEqualTo(donationId);
 
         if (response.containsKey("id")) {

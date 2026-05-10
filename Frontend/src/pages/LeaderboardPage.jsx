@@ -79,7 +79,7 @@ const LeaderboardPage = () => {
           <div className="space-y-4">
             {/* Top 3 podium */}
             {ngos.length >= 3 && (
-              <div className="grid grid-cols-3 gap-4 mb-8">
+              <div className="hidden sm:grid grid-cols-3 gap-4 mb-8">
                 {[ngos[1], ngos[0], ngos[2]].map((ngo, podiumIdx) => {
                   const rank = podiumIdx === 1 ? 1 : podiumIdx === 0 ? 2 : 3;
                   const heights = ['h-32', 'h-44', 'h-28'];
@@ -101,11 +101,11 @@ const LeaderboardPage = () => {
 
             {/* Full ranked list */}
             <div className="structured-card bg-white overflow-hidden">
-              <div className="px-6 py-4 border-b border-slate-100 bg-slate-50">
-                <div className="grid grid-cols-12 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              <div className="px-4 sm:px-6 py-4 border-b border-slate-100 bg-slate-50">
+                <div className="grid grid-cols-8 sm:grid-cols-12 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                   <span className="col-span-1">Rank</span>
-                  <span className="col-span-5">Organization</span>
-                  <span className="col-span-2 text-right">Pickups</span>
+                  <span className="col-span-5 sm:col-span-5">Organization</span>
+                  <span className="hidden sm:block col-span-2 text-right">Pickups</span>
                   <span className="col-span-2 text-right">Meals</span>
                   <span className="col-span-2 text-right">Rating</span>
                 </div>
@@ -114,7 +114,7 @@ const LeaderboardPage = () => {
                 {ngos.map((ngo, idx) => (
                   <div
                     key={ngo.id}
-                    className={`px-6 py-4 grid grid-cols-12 items-center hover:bg-slate-50 transition-colors ${idx < 3 ? 'bg-gradient-to-r from-slate-50/50 to-transparent' : ''}`}
+                    className={`px-4 sm:px-6 py-4 grid grid-cols-8 sm:grid-cols-12 items-center hover:bg-slate-50 transition-colors ${idx < 3 ? 'bg-gradient-to-r from-slate-50/50 to-transparent' : ''}`}
                   >
                     <div className="col-span-1">
                       {idx < 3 ? (
@@ -124,17 +124,17 @@ const LeaderboardPage = () => {
                       )}
                     </div>
                     <div className="col-span-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-primary-100 rounded-full flex items-center justify-center text-primary-700 font-bold text-sm shrink-0">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="w-8 h-8 sm:w-9 sm:h-9 bg-primary-100 rounded-full flex items-center justify-center text-primary-700 font-bold text-sm shrink-0">
                           {ngo.name.charAt(0).toUpperCase()}
                         </div>
-                        <div>
-                          <p className="font-bold text-slate-900 text-sm">{ngo.name}</p>
-                          <p className="text-[10px] text-slate-400 uppercase tracking-widest">Verified NGO</p>
+                        <div className="min-w-0">
+                          <p className="font-bold text-slate-900 text-sm truncate">{ngo.name}</p>
+                          <p className="text-[10px] text-slate-400 uppercase tracking-widest hidden sm:block">Verified NGO</p>
                         </div>
                       </div>
                     </div>
-                    <div className="col-span-2 text-right">
+                    <div className="hidden sm:block col-span-2 text-right">
                       <span className="text-sm font-bold text-slate-700">{ngo.completedPickups}</span>
                     </div>
                     <div className="col-span-2 text-right">
@@ -146,10 +146,10 @@ const LeaderboardPage = () => {
                       {ngo.rating.count > 0 ? (
                         <span className="text-sm font-bold text-amber-600 flex items-center justify-end gap-1">
                           <Star size={12} className="fill-amber-500" /> {ngo.rating.average.toFixed(1)}
-                          <span className="text-[10px] text-slate-400 font-normal">({ngo.rating.count})</span>
+                          <span className="text-[10px] text-slate-400 font-normal hidden sm:inline">({ngo.rating.count})</span>
                         </span>
                       ) : (
-                        <span className="text-[10px] text-slate-300 font-medium">No ratings</span>
+                        <span className="text-[10px] text-slate-300 font-medium">—</span>
                       )}
                     </div>
                   </div>

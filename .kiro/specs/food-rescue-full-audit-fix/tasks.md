@@ -18,7 +18,7 @@
   - Mark task complete when tests are written, run, and failures are documented
   - _Requirements: 1.1, 1.2, 2.2, 4.1, 4.2, 5.1, 11.1_
 
-- [-] 2. Write preservation property tests (BEFORE implementing fix)
+- [ ] 2. Write preservation property tests (BEFORE implementing fix)
   - **Property 2: Preservation** - Core Donation Lifecycle and Public Endpoints
   - **IMPORTANT**: Follow observation-first methodology
   - Observe: authenticated donor creating a donation returns 200 with AVAILABLE status and confirmation code on unfixed code
