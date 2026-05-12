@@ -1,6 +1,7 @@
 package com.food.food_rescue.controller;
 
 import com.food.food_rescue.dto.ChangePasswordRequest;
+import com.food.food_rescue.dto.ForgotPasswordRequest;
 import com.food.food_rescue.dto.LoginRequest;
 import com.food.food_rescue.dto.ResetPasswordRequest;
 import com.food.food_rescue.dto.UpdateProfileRequest;
@@ -94,7 +95,7 @@ public class UserController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         // Always return the same message to prevent phone enumeration
         userRepository.findByPhone(request.getPhone()).ifPresent(u ->
             log.info("Password reset requested for user id={}", u.getId())

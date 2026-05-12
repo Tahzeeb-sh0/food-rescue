@@ -16,7 +16,7 @@ public class DonationRequest {
     @Size(max = 500, message = "Description must not exceed 500 characters")
     private String description;
 
-    @Size(max = 500, message = "Photo URL must not exceed 500 characters")
+    // No size limit — accepts both URLs and base64-encoded data URIs
     private String photoUrl;
 
     @Min(value = 1, message = "Capacity must be at least 1")

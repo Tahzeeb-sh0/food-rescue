@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Send, Building, ShieldAlert, CheckCircle, Loader2 } from 'lucide-react';
 
-const API = 'http://localhost:8080';
+import { API_BASE as API } from '../utils/api';
 
 const ContactPage = () => {
   const [form, setForm] = useState({ name: '', email: '', subject: 'General Inquiry', message: '' });

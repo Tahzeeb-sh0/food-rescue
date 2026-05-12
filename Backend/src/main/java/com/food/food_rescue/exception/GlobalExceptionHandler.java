@@ -2,6 +2,7 @@ package com.food.food_rescue.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -27,6 +28,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(Map.of("errors", fieldErrors));
     }
 
+    // Dedicated handler for optimistic locking — always 409 Conflict
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<Map<String, String>> handleOptimisticLock(OptimisticLockingFailureException e) {
+        log.warn("Optimistic locking conflict: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", "Donation was just claimed by another NGO. Please try a different one."));
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException e) {
         return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -37,11 +46,10 @@ public class GlobalExceptionHandler {
         String msg = e.getMessage() != null ? e.getMessage() : "An error occurred";
         log.error("Runtime error: {}", msg);
 
-        // Map common messages to appropriate HTTP status codes
         if (msg.contains("not found") || msg.contains("Not found")) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", msg));
         }
-        if (msg.contains("already claimed") || msg.contains("already exists") || msg.contains("already registered")) {
+        if (msg.contains("already claimed") || msg.contains("just claimed") || msg.contains("already exists") || msg.contains("already registered")) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", msg));
         }
         if (msg.contains("Only the") || msg.contains("not authorized") || msg.contains("Forbidden")) {

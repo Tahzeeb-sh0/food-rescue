@@ -12,7 +12,7 @@ public class UserRegistrationRequest {
     private String name;
 
     @NotBlank(message = "Phone is required")
-    @Pattern(regexp = "^\\+?[0-9]{7,15}$", message = "Invalid phone number format")
+    @Pattern(regexp = "^\\+?[0-9 ()\\-]{7,20}$", message = "Invalid phone number format")
     private String phone;
 
     @NotNull(message = "Role is required")

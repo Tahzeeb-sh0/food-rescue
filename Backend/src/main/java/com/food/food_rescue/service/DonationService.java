@@ -6,6 +6,7 @@ import com.food.food_rescue.model.Donation;
 import com.food.food_rescue.model.DonationStatus;
 import com.food.food_rescue.repository.DonationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Metrics;
 import org.springframework.data.geo.Point;
@@ -69,13 +70,16 @@ public class DonationService {
         donation.setClaimedByNgoId(ngoId);
         donation.setClaimedAt(LocalDateTime.now());
 
-        // Optimistic locking handles the race condition here
-        Donation savedDonation = donationRepository.save(donation);
-        
-        // Broadcast the claim status
-        messagingTemplate.convertAndSend("/topic/donations/claimed", savedDonation);
-
-        return savedDonation;
+        try {
+            // @Version on Donation provides optimistic locking — if two NGOs claim
+            // simultaneously, the second save throws OptimisticLockingFailureException.
+            Donation savedDonation = donationRepository.save(donation);
+            messagingTemplate.convertAndSend("/topic/donations/claimed", savedDonation);
+            return savedDonation;
+        } catch (OptimisticLockingFailureException e) {
+            // Another NGO claimed this donation concurrently — surface a clean 409
+            throw new RuntimeException("Donation was just claimed by another NGO. Please try a different one.");
+        }
     }
 
     public Donation completePickup(String donationId, String ngoId, String confirmationCode) {

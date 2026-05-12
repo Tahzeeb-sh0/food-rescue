@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { Bell, Lock, Shield, Eye, EyeOff, Save, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 
-const API = 'http://localhost:8080';
+import { API_BASE as API } from '../utils/api';
 
 const DEFAULT_NOTIFICATIONS = [
   { id: 'new_donations', label: 'New Food Alerts', active: true, desc: 'Get notified when new food is available within 10km.' },

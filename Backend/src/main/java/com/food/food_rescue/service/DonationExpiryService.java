@@ -16,6 +16,10 @@ import java.util.List;
 /**
  * Automatically expires AVAILABLE donations that have not been claimed
  * within the configured window (default: 4 hours).
+ *
+ * Fix: use findByStatusAndCreatedAtBefore so the cutoff filter runs at the
+ * database level (index-backed) instead of loading all AVAILABLE donations
+ * into memory and filtering in Java.
  */
 @Service
 @RequiredArgsConstructor
@@ -32,14 +36,13 @@ public class DonationExpiryService {
      * and deletes them, broadcasting a cancellation event so connected NGO
      * dashboards remove the card in real time.
      */
-    @Scheduled(fixedDelay = 15 * 60 * 1000) // every 15 minutes
+    @Scheduled(fixedDelay = 15 * 60 * 1000)
     public void expireOldDonations() {
         LocalDateTime cutoff = LocalDateTime.now().minusHours(EXPIRY_HOURS);
 
-        List<Donation> expired = donationRepository.findByStatus(DonationStatus.AVAILABLE)
-                .stream()
-                .filter(d -> d.getCreatedAt() != null && d.getCreatedAt().isBefore(cutoff))
-                .toList();
+        // DB-level filter — avoids loading all AVAILABLE donations into memory
+        List<Donation> expired = donationRepository
+                .findByStatusAndCreatedAtBefore(DonationStatus.AVAILABLE, cutoff);
 
         if (expired.isEmpty()) return;
 

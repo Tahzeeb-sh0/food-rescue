@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { Building2, ShieldCheck, Phone, Save, Loader2, Camera, CheckCircle, Globe } from 'lucide-react';
 
-const API = 'http://localhost:8080';
+import { API_BASE as API } from '../utils/api';
 
 const ProfilePage = () => {
   const [user, setUser] = useState(null);

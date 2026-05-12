@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+import { API_BASE } from '../utils/api';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import ChatBox from '../components/ChatBox';
 import MapView from '../components/MapView';

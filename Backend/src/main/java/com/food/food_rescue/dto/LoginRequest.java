@@ -8,7 +8,7 @@ import lombok.Data;
 public class LoginRequest {
 
     @NotBlank(message = "Phone is required")
-    @Pattern(regexp = "^\\+?[0-9]{7,15}$", message = "Invalid phone number format")
+    @Pattern(regexp = "^\\+?[0-9 ()\\-]{7,20}$", message = "Invalid phone number format")
     private String phone;
 
     @NotBlank(message = "Password is required")

@@ -1,8 +1,9 @@
 package com.food.food_rescue.controller;
 
 import com.food.food_rescue.dto.LeaderboardEntry;
+import com.food.food_rescue.model.Donation;
 import com.food.food_rescue.model.DonationStatus;
-import com.food.food_rescue.model.Role;
+import com.food.food_rescue.model.User;
 import com.food.food_rescue.repository.DonationRepository;
 import com.food.food_rescue.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,28 +29,28 @@ public class LeaderboardController {
     public List<LeaderboardEntry> getLeaderboard(
             @RequestParam(defaultValue = "10") int limit) {
 
-        // Get all completed donations grouped by NGO
-        Map<String, List<com.food.food_rescue.model.Donation>> byNgo =
-                donationRepository.findByStatus(DonationStatus.COMPLETED)
-                        .stream()
-                        .filter(d -> d.getClaimedByNgoId() != null)
-                        .collect(Collectors.groupingBy(
-                                com.food.food_rescue.model.Donation::getClaimedByNgoId));
+        // Group completed donations by NGO id
+        Map<String, List<Donation>> byNgo = donationRepository
+                .findByStatus(DonationStatus.COMPLETED)
+                .stream()
+                .filter(d -> d.getClaimedByNgoId() != null)
+                .collect(Collectors.groupingBy(Donation::getClaimedByNgoId));
 
-        // Build leaderboard entries
+        // Batch-load all NGO users in one query — avoids N+1 findById calls
+        Map<String, String> ngoNames = userRepository
+                .findAllById(byNgo.keySet())
+                .stream()
+                .collect(Collectors.toMap(User::getId, User::getName));
+
         return byNgo.entrySet().stream()
                 .map(entry -> {
                     String ngoId = entry.getKey();
-                    List<com.food.food_rescue.model.Donation> donations = entry.getValue();
-                    long totalMeals = donations.stream().mapToLong(d -> d.getCapacity()).sum();
+                    List<Donation> donations = entry.getValue();
+                    long totalMeals = donations.stream().mapToLong(Donation::getCapacity).sum();
                     long pickups = donations.size();
-                    double co2 = totalMeals * 0.5; // 0.5 kg CO2 per meal
-
-                    String name = userRepository.findById(ngoId)
-                            .map(com.food.food_rescue.model.User::getName)
-                            .orElse("Unknown NGO");
-
-                    return new LeaderboardEntry(ngoId, name, totalMeals, pickups, co2);
+                    double co2Kg = totalMeals * 0.5; // 0.5 kg CO2 per meal (WRAP estimate)
+                    String name = ngoNames.getOrDefault(ngoId, "Unknown NGO");
+                    return new LeaderboardEntry(ngoId, name, totalMeals, pickups, co2Kg);
                 })
                 .sorted(Comparator.comparingLong(LeaderboardEntry::getTotalMeals).reversed())
                 .limit(limit)

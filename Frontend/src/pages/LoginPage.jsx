@@ -49,8 +49,13 @@ const LoginPage = () => {
         body: JSON.stringify({ phone, password }),
       });
       if (res.ok) {
-        localStorage.setItem('user', JSON.stringify(await res.json()));
-        navigate('/ngo/dashboard');
+        const userData = await res.json();
+        localStorage.setItem('user', JSON.stringify(userData));
+        if (userData.role === 'NGO') {
+          navigate('/ngo/dashboard');
+        } else {
+          setError('This account is not registered as an NGO. Please use the donor login.');
+        }
       } else {
         setError('Invalid phone number or password.');
       }
