@@ -19,7 +19,7 @@ const ChatBox = ({ donationId, currentUser }) => {
     setIsLoadingHistory(true);
 
     // Fetch history for this specific donation
-    fetch(`http://localhost:8080/api/chat/${donationId}/history`)
+    fetch(`${API_BASE}/api/chat/${donationId}/history`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to load');
         return res.json();
@@ -29,7 +29,7 @@ const ChatBox = ({ donationId, currentUser }) => {
       .finally(() => setIsLoadingHistory(false));
 
     // Connect WebSocket and subscribe to this donation's chat topic
-    const socket = new SockJS('http://localhost:8080/ws');
+    const socket = new SockJS('${API_BASE}/ws');
     const client = Stomp.over(socket);
     client.debug = () => {};
 

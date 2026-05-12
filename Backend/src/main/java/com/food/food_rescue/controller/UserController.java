@@ -1,5 +1,6 @@
 package com.food.food_rescue.controller;
 
+import com.food.food_rescue.config.JwtUtil;
 import com.food.food_rescue.dto.ChangePasswordRequest;
 import com.food.food_rescue.dto.ForgotPasswordRequest;
 import com.food.food_rescue.dto.LoginRequest;
@@ -29,6 +30,7 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     @GetMapping("/ngos")
     public ResponseEntity<List<UserResponse>> getAllNgos() {
@@ -62,7 +64,11 @@ public class UserController {
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         return userRepository.findByPhone(request.getPhone())
                 .filter(u -> passwordEncoder.matches(request.getPassword(), u.getPassword()))
-                .map(u -> ResponseEntity.ok(UserResponse.from(u)))
+                .map(u -> {
+                    UserResponse response = UserResponse.from(u);
+                    response.setToken(jwtUtil.generateToken(u.getId(), u.getRole().name()));
+                    return ResponseEntity.ok(response);
+                })
                 .orElse(ResponseEntity.status(401).build());
     }
 

@@ -20,7 +20,7 @@ const DonationPublicPage = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch(`http://localhost:8080/api/donations/${id}`)
+    fetch(`${API_BASE}/api/donations/${id}`)
       .then(r => {
         if (!r.ok) throw new Error('Not found');
         return r.json();

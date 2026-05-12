@@ -12,6 +12,7 @@ public class UserResponse {
     private String phone;
     private Role role;
     private GeoJsonPoint location;
+    private String token; // JWT — only set on login, null on register
 
     public static UserResponse from(User user) {
         UserResponse r = new UserResponse();

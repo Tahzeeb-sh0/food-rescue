@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,9 +23,12 @@ public class DonationController {
     private final DonationService donationService;
 
     @PostMapping
-    public ResponseEntity<Donation> createDonation(@Valid @RequestBody DonationRequest request) {
+    public ResponseEntity<Donation> createDonation(@Valid @RequestBody DonationRequest request,
+                                                    Authentication auth) {
+        // Use the authenticated principal's id — ignore any donorId in the request body
+        String donorId = auth.getName();
         Donation donation = Donation.builder()
-                .donorId(request.getDonorId())
+                .donorId(donorId)
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .photoUrl(request.getPhotoUrl())
@@ -51,14 +55,26 @@ public class DonationController {
 
     @PostMapping("/{id}/claim")
     public ResponseEntity<Donation> claimDonation(@PathVariable String id,
-                                                   @Valid @RequestBody ClaimRequest request) {
-        return ResponseEntity.ok(donationService.claimDonation(id, request.getNgoId()));
+                                                   @Valid @RequestBody ClaimRequest request,
+                                                   Authentication auth) {
+        // Verify the authenticated principal matches the ngoId in the request
+        String principalId = auth.getName();
+        if (!principalId.equals(request.getNgoId())) {
+            return ResponseEntity.status(403).build();
+        }
+        return ResponseEntity.ok(donationService.claimDonation(id, principalId));
     }
 
     @PostMapping("/{id}/complete")
     public ResponseEntity<Donation> completePickup(@PathVariable String id,
-                                                    @Valid @RequestBody CompleteRequest request) {
-        return ResponseEntity.ok(donationService.completePickup(id, request.getNgoId(), request.getConfirmationCode()));
+                                                    @Valid @RequestBody CompleteRequest request,
+                                                    Authentication auth) {
+        // Verify the authenticated principal is the claiming NGO
+        String principalId = auth.getName();
+        if (!principalId.equals(request.getNgoId())) {
+            return ResponseEntity.status(403).build();
+        }
+        return ResponseEntity.ok(donationService.completePickup(id, principalId, request.getConfirmationCode()));
     }
 
     @GetMapping("/donor/{donorId}")
@@ -73,15 +89,18 @@ public class DonationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> cancelDonation(@PathVariable String id,
-                                               @RequestParam String donorId) {
-        donationService.cancelDonation(id, donorId);
+                                               Authentication auth) {
+        // Extract donorId from JWT principal — not from query param
+        donationService.cancelDonation(id, auth.getName());
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<Donation> updateDonation(@PathVariable String id,
-                                                    @RequestParam String donorId,
-                                                    @Valid @RequestBody UpdateDonationRequest request) {
-        return ResponseEntity.ok(donationService.updateDonation(id, donorId, request.getTitle(), request.getDescription(), request.getCapacity()));
+                                                    @Valid @RequestBody UpdateDonationRequest request,
+                                                    Authentication auth) {
+        // Extract donorId from JWT principal — not from query param
+        return ResponseEntity.ok(donationService.updateDonation(
+                id, auth.getName(), request.getTitle(), request.getDescription(), request.getCapacity()));
     }
 }

@@ -43,7 +43,7 @@ const DonorLoginPage = () => {
     setIsLoading(true);
     setError('');
     try {
-      const res = await fetch('http://localhost:8080/api/users/login', {
+      const res = await fetch('${API_BASE}/api/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone, password }),
@@ -51,6 +51,7 @@ const DonorLoginPage = () => {
       if (res.ok) {
         const userData = await res.json();
         localStorage.setItem('user', JSON.stringify(userData));
+        if (userData.token) localStorage.setItem('token', userData.token);
         if (userData.role === 'DONOR') {
           navigate('/donor/dashboard');
         } else {

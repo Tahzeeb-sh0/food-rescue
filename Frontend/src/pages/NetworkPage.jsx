@@ -21,7 +21,7 @@ const NetworkPage = () => {
   const itemsPerPage = 6;
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/users/ngos')
+    fetch('${API_BASE}/api/users/ngos')
       .then(res => res.json())
       .then(data => {
         // Convert backend User model to directory format

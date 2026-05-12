@@ -36,7 +36,7 @@ const NotificationCenter = ({ userId, role }) => {
 
   // Subscribe to WebSocket events
   useEffect(() => {
-    const socket = new SockJS('http://localhost:8080/ws');
+    const socket = new SockJS('${API_BASE}/ws');
     const client = Stomp.over(socket);
     client.debug = () => {};
 

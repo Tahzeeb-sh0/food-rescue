@@ -62,7 +62,7 @@ const RatingModal = ({ donation, currentUser, onClose, onSubmitted }) => {
     setIsSubmitting(true);
     setError('');
     try {
-      const res = await fetch('http://localhost:8080/api/ratings', {
+      const res = await fetch('${API_BASE}/api/ratings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -191,7 +191,7 @@ const DonorDashboard = () => {
     setIsLoading(true);
     setFetchError('');
     try {
-      const res = await fetch(`http://localhost:8080/api/donations/donor/${userId}`);
+      const res = await fetch(`${API_BASE}/api/donations/donor/${userId}`);
       if (res.ok) {
         const data = await res.json();
         setDonations(data);
@@ -206,7 +206,7 @@ const DonorDashboard = () => {
   };
   
   useEffect(() => {
-    const socket = new SockJS('http://localhost:8080/ws');
+    const socket = new SockJS('${API_BASE}/ws');
     const client = Stomp.over(() => socket);
     client.debug = () => {}; 
 
@@ -261,7 +261,7 @@ const DonorDashboard = () => {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
-          const res = await fetch('http://localhost:8080/api/donations', {
+          const res = await fetch('${API_BASE}/api/donations', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -307,7 +307,7 @@ const DonorDashboard = () => {
   const handleCancel = async (donationId) => {
     if (!user || !window.confirm('Cancel this donation?')) return;
     try {
-      await fetch(`http://localhost:8080/api/donations/${donationId}?donorId=${user.id}`, { method: 'DELETE' });
+      await fetch(`${API_BASE}/api/donations/${donationId}?donorId=${user.id}`, { method: 'DELETE' });
       setDonations(prev => prev.filter(d => d.id !== donationId));
     } catch {
       setDonations(prev => prev.filter(d => d.id !== donationId));

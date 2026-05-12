@@ -22,7 +22,7 @@ const HomePage = () => {
   const [stats, setStats] = useState({ meals: 0, co2: 0, ngos: 0 });
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/stats/impact')
+    fetch('${API_BASE}/api/stats/impact')
       .then(res => res.json())
       .then(data => setStats({
         meals: data.totalMeals || 0,

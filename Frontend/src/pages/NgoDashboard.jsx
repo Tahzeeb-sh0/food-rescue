@@ -143,7 +143,7 @@ const NgoDashboard = () => {
       const parsedUser = JSON.parse(savedUser);
       setUser(parsedUser);
       fetchNearby(parsedUser.location?.x || -74.006, parsedUser.location?.y || 40.7128, parsedUser.id, radius);
-      fetch(`http://localhost:8080/api/ratings/ngo/${parsedUser.id}/average`)
+      fetch(`${API_BASE}/api/ratings/ngo/${parsedUser.id}/average`)
         .then(r => r.json())
         .then(data => setAvgRating(data))
         .catch(() => {});
@@ -153,7 +153,7 @@ const NgoDashboard = () => {
   const fetchNearby = (lon, lat, userId, radiusKm = 10) => {
     setIsLoading(true);
     setFetchError('');
-    fetch(`http://localhost:8080/api/donations/nearby?lon=${lon}&lat=${lat}&radiusKm=${radiusKm}`)
+    fetch(`${API_BASE}/api/donations/nearby?lon=${lon}&lat=${lat}&radiusKm=${radiusKm}`)
       .then(r => {
         if (!r.ok) throw new Error('Failed');
         return r.json();
@@ -162,7 +162,7 @@ const NgoDashboard = () => {
       .catch(() => setFetchError('Could not load nearby donations. Check your connection and refresh.'))
       .finally(() => setIsLoading(false));
 
-    fetch(`http://localhost:8080/api/donations/ngo/${userId}`)
+    fetch(`${API_BASE}/api/donations/ngo/${userId}`)
       .then(r => r.json())
       .then(data => {
         setHistory(data);
@@ -180,7 +180,7 @@ const NgoDashboard = () => {
   };
 
   useEffect(() => {
-    const socket = new SockJS('http://localhost:8080/ws');
+    const socket = new SockJS('${API_BASE}/ws');
     const client = Stomp.over(socket);
     client.debug = () => {};
 
@@ -207,7 +207,7 @@ const NgoDashboard = () => {
          const completed = JSON.parse(msg.body);
          if(activeClaim && activeClaim.id === completed.id) {
             setActiveClaim(completed);
-            if(user) fetch(`http://localhost:8080/api/donations/ngo/${user.id}`).then(r => r.json()).then(setHistory);
+            if(user) fetch(`${API_BASE}/api/donations/ngo/${user.id}`).then(r => r.json()).then(setHistory);
          }
       });
     });
@@ -219,7 +219,7 @@ const NgoDashboard = () => {
     if (!user) return;
     setClaimError('');
     try {
-      const res = await fetch(`http://localhost:8080/api/donations/${donationId}/claim`, {
+      const res = await fetch(`${API_BASE}/api/donations/${donationId}/claim`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ngoId: user.id })
@@ -240,7 +240,7 @@ const NgoDashboard = () => {
     if (!user || !activeClaim) return;
     setCodeError('');
     try {
-      const res = await fetch(`http://localhost:8080/api/donations/${activeClaim.id}/complete`, {
+      const res = await fetch(`${API_BASE}/api/donations/${activeClaim.id}/complete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ngoId: user.id, confirmationCode })

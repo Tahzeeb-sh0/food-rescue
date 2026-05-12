@@ -18,7 +18,7 @@
   - Mark task complete when tests are written, run, and failures are documented
   - _Requirements: 1.1, 1.2, 2.2, 4.1, 4.2, 5.1, 11.1_
 
-- [ ] 2. Write preservation property tests (BEFORE implementing fix)
+- [x] 2. Write preservation property tests (BEFORE implementing fix)
   - **Property 2: Preservation** - Core Donation Lifecycle and Public Endpoints
   - **IMPORTANT**: Follow observation-first methodology
   - Observe: authenticated donor creating a donation returns 200 with AVAILABLE status and confirmation code on unfixed code
@@ -35,9 +35,9 @@
   - Mark task complete when tests are written, run, and passing on unfixed code
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11, 3.12_
 
-- [ ] 3. Fix — JWT Authentication and Authorization Enforcement
+- [-] 3. Fix — JWT Authentication and Authorization Enforcement
 
-  - [ ] 3.1 Implement JWT token generation and filter
+  - [x] 3.1 Implement JWT token generation and filter
     - Create a JwtUtil class that generates and validates JWT tokens (sign with a secret from application.properties)
     - Create a JwtAuthenticationFilter extending OncePerRequestFilter that extracts the Bearer token, validates it, and sets the SecurityContext
     - _Bug_Condition: isBugCondition_NoAuth(request) — request.path NOT IN publicEndpoints AND request.headers["Authorization"] IS NULL_
@@ -45,17 +45,17 @@
     - _Preservation: Valid authenticated requests to all endpoints continue to function as before (3.1–3.12)_
     - _Requirements: 1.1, 2.1_
 
-  - [ ] 3.2 Wire JWT filter into SecurityConfig
+  - [x] 3.2 Wire JWT filter into SecurityConfig
     - Add JwtAuthenticationFilter to the Spring Security filter chain before UsernamePasswordAuthenticationFilter
     - Define public endpoints (login, register, forgot-password, reset-password, GET /api/stats, GET /api/leaderboard, GET /api/donations/nearby, WebSocket handshake) as permitAll
     - Require authentication for all other endpoints
     - _Requirements: 1.1, 2.1_
 
-  - [ ] 3.3 Return JWT in login response
+  - [x] 3.3 Return JWT in login response
     - Update UserController login endpoint to generate a JWT for the authenticated user and include it in the UserResponse
     - _Requirements: 3.7_
 
-  - [ ] 3.4 Enforce ownership from JWT principal (not query params)
+  - [x] 3.4 Enforce ownership from JWT principal (not query params)
     - Update DELETE /api/donations/{id} to extract donorId from the authenticated JWT principal instead of a query parameter
     - Update PATCH /api/donations/{id} to extract donorId from the authenticated JWT principal instead of a query parameter
     - Update POST /api/donations/{id}/claim to verify the ngoId in the request body matches the authenticated principal

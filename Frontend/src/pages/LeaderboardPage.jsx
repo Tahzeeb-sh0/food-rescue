@@ -12,15 +12,15 @@ const LeaderboardPage = () => {
   useEffect(() => {
     // Fetch all NGOs and their donation history
     Promise.all([
-      fetch('http://localhost:8080/api/users/ngos').then(r => r.json()),
+      fetch('${API_BASE}/api/users/ngos').then(r => r.json()),
     ])
       .then(async ([ngoList]) => {
         // For each NGO, fetch their completed pickups and rating
         const enriched = await Promise.all(
           ngoList.map(async (ngo) => {
             const [donationsRes, ratingRes] = await Promise.allSettled([
-              fetch(`http://localhost:8080/api/donations/ngo/${ngo.id}`).then(r => r.json()),
-              fetch(`http://localhost:8080/api/ratings/ngo/${ngo.id}/average`).then(r => r.json()),
+              fetch(`${API_BASE}/api/donations/ngo/${ngo.id}`).then(r => r.json()),
+              fetch(`${API_BASE}/api/ratings/ngo/${ngo.id}/average`).then(r => r.json()),
             ]);
 
             const donations = donationsRes.status === 'fulfilled' ? donationsRes.value : [];

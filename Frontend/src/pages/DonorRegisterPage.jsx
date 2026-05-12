@@ -15,7 +15,7 @@ const DonorRegisterPage = () => {
     setIsLoading(true);
     setError('');
     try {
-      const res = await fetch('http://localhost:8080/api/users/register', {
+      const res = await fetch('${API_BASE}/api/users/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

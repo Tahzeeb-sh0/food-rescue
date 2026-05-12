@@ -1,34 +1,34 @@
 package com.food.food_rescue.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * CORS configuration wired directly into Spring Security so that
-     * preflight OPTIONS requests are handled before auth rules are evaluated.
-     * This fixes the "No 'Access-Control-Allow-Origin' header" browser error.
-     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
@@ -36,7 +36,7 @@ public class SecurityConfig {
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "Authorization"));
         config.setAllowCredentials(true);
-        config.setMaxAge(3600L); // cache preflight for 1 hour
+        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
@@ -50,9 +50,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Allow CORS preflight through without auth
-                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-                // Public endpoints
+                // CORS preflight
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // Public endpoints — no token required
                 .requestMatchers(
                     "/api/users/register",
                     "/api/users/login",
@@ -62,13 +62,16 @@ public class SecurityConfig {
                     "/api/stats/**",
                     "/api/leaderboard",
                     "/api/users/ngos",
-                    "/api/donations/**",
-                    "/api/ratings/**",
                     "/ws/**"
                 ).permitAll()
-                // Everything else requires authentication
+                // Nearby donations — public read
+                .requestMatchers(HttpMethod.GET, "/api/donations/nearby").permitAll()
+                // Everything else requires a valid JWT
                 .anyRequest().authenticated()
-            );
+            )
+            // Insert JWT filter before Spring's username/password filter
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 }

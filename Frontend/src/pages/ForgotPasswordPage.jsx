@@ -47,7 +47,7 @@ const ForgotPasswordPage = () => {
     setSendError('');
     setIsLoading(true);
     try {
-      const res = await fetch('http://localhost:8080/api/users/forgot-password', {
+      const res = await fetch('${API_BASE}/api/users/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone }),
@@ -67,7 +67,7 @@ const ForgotPasswordPage = () => {
     if (password.length < 8) { setResetError('Password must be at least 8 characters.'); return; }
     setIsLoading(true);
     try {
-      await fetch('http://localhost:8080/api/users/reset-password', {
+      await fetch('${API_BASE}/api/users/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone, newPassword: password }),

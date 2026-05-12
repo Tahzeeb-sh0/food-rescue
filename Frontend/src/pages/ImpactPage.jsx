@@ -7,7 +7,7 @@ const ImpactPage = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/stats/impact')
+    fetch('${API_BASE}/api/stats/impact')
       .then(res => {
         if (!res.ok) throw new Error('Failed');
         return res.json();
