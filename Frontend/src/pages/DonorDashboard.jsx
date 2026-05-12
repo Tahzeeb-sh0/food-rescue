@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import { API_BASE } from '../utils/api';
+import { API_BASE, apiFetch } from '../utils/api';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import ChatBox from '../components/ChatBox';
 import MapView from '../components/MapView';
@@ -62,9 +62,8 @@ const RatingModal = ({ donation, currentUser, onClose, onSubmitted }) => {
     setIsSubmitting(true);
     setError('');
     try {
-      const res = await fetch('${API_BASE}/api/ratings', {
+      const res = await apiFetch('/api/ratings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           donationId: donation.id,
           donorId: currentUser.id,
@@ -191,7 +190,7 @@ const DonorDashboard = () => {
     setIsLoading(true);
     setFetchError('');
     try {
-      const res = await fetch(`${API_BASE}/api/donations/donor/${userId}`);
+      const res = await apiFetch(`/api/donations/donor/${userId}`);
       if (res.ok) {
         const data = await res.json();
         setDonations(data);
@@ -206,8 +205,8 @@ const DonorDashboard = () => {
   };
   
   useEffect(() => {
-    const socket = new SockJS('${API_BASE}/ws');
-    const client = Stomp.over(() => socket);
+    const socket = new SockJS(`${API_BASE}/ws`);
+    const client = Stomp.over(socket);
     client.debug = () => {}; 
 
     client.connect({}, () => {
@@ -261,9 +260,8 @@ const DonorDashboard = () => {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
-          const res = await fetch('${API_BASE}/api/donations', {
+          const res = await apiFetch('/api/donations', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               donorId: user?.id,
               title,
@@ -307,7 +305,7 @@ const DonorDashboard = () => {
   const handleCancel = async (donationId) => {
     if (!user || !window.confirm('Cancel this donation?')) return;
     try {
-      await fetch(`${API_BASE}/api/donations/${donationId}?donorId=${user.id}`, { method: 'DELETE' });
+      await apiFetch(`/api/donations/${donationId}`, { method: 'DELETE' });
       setDonations(prev => prev.filter(d => d.id !== donationId));
     } catch {
       setDonations(prev => prev.filter(d => d.id !== donationId));

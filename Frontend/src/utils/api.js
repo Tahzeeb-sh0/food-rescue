@@ -9,6 +9,9 @@
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
+/** Base URL for building endpoints (same as env default used by {@link apiFetch}). */
+export const API_BASE = BASE_URL;
+
 export function apiFetch(path, options = {}) {
   const token = localStorage.getItem('token');
 

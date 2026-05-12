@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Bell, X, Package, CheckCircle, User, Trash2 } from 'lucide-react';
 import { Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+import { API_BASE } from '../utils/api';
 
 const ICON_MAP = {
   new:       <Package size={16} className="text-accent-600" />,
@@ -36,7 +37,7 @@ const NotificationCenter = ({ userId, role }) => {
 
   // Subscribe to WebSocket events
   useEffect(() => {
-    const socket = new SockJS('${API_BASE}/ws');
+    const socket = new SockJS(`${API_BASE}/ws`);
     const client = Stomp.over(socket);
     client.debug = () => {};
 
@@ -128,8 +129,14 @@ const NotificationCenter = ({ userId, role }) => {
     });
   };
 
+  const [nowClock, setNowClock] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNowClock(Date.now()), 30_000);
+    return () => clearInterval(id);
+  }, []);
+
   const timeAgo = (iso) => {
-    const diff = Date.now() - new Date(iso);
+    const diff = nowClock - new Date(iso);
     const mins = Math.floor(diff / 60000);
     if (mins < 1) return 'Just now';
     if (mins < 60) return `${mins}m ago`;

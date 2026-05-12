@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_BASE } from '../utils/api';
 import { Building2, Phone, Lock, ShieldCheck, Loader2, Eye, EyeOff, CheckCircle2, ArrowLeft } from 'lucide-react';
 
 const InputField = ({ label, icon: Icon, type = 'text', value, onChange, placeholder, autoComplete, hint }) => {
@@ -45,7 +46,7 @@ const RegisterPage = () => {
     setIsLoading(true);
     setError('');
     try {
-      const res = await fetch('${API_BASE}/api/users/register', {
+      const res = await fetch(`${API_BASE}/api/users/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, phone, password, role: 'NGO', longitude: -74.006, latitude: 40.7128 }),

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Utensils, Clock, CheckCircle, Package, ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
+import { API_BASE } from '../utils/api';
 
 const STATUS_CONFIG = {
   AVAILABLE: { label: 'Available for Pickup', color: 'bg-amber-50 text-amber-700 border-amber-200', dot: 'bg-amber-500' },

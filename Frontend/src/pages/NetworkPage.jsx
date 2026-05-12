@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Loader2
 } from 'lucide-react';
+import { API_BASE } from '../utils/api';
 
 const NetworkPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -21,7 +22,7 @@ const NetworkPage = () => {
   const itemsPerPage = 6;
 
   useEffect(() => {
-    fetch('${API_BASE}/api/users/ngos')
+    fetch(`${API_BASE}/api/users/ngos`)
       .then(res => res.json())
       .then(data => {
         // Convert backend User model to directory format

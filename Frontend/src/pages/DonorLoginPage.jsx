@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Phone, Lock, LogIn, ArrowLeft, Loader2, Eye, EyeOff, Heart } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_BASE } from '../utils/api';
 
 const InputField = ({ label, icon: Icon, type = 'text', value, onChange, placeholder, autoComplete, extra }) => {
   const [show, setShow] = useState(false);
@@ -43,7 +44,7 @@ const DonorLoginPage = () => {
     setIsLoading(true);
     setError('');
     try {
-      const res = await fetch('${API_BASE}/api/users/login', {
+      const res = await fetch(`${API_BASE}/api/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone, password }),

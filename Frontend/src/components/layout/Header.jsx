@@ -30,8 +30,10 @@ const Header = () => {
 
   // Close mobile menu on route change
   useEffect(() => {
-    setIsMenuOpen(false);
-    setIsDropdownOpen(false);
+    queueMicrotask(() => {
+      setIsMenuOpen(false);
+      setIsDropdownOpen(false);
+    });
   }, [location.pathname]);
 
   return (

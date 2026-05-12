@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { LayoutDashboard, Heart, History, Settings, LogOut, Menu, X, User, ShieldCheck, Globe, Bell } from 'lucide-react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import NotificationCenter from '../NotificationCenter';
@@ -20,14 +20,16 @@ const Building = ({ size, className }) => (
 
 const DashboardLayout = ({ children, role }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch {
+      return null;
+    }
+  });
   const navigate = useNavigate();
   const location = useLocation();
-
-  useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) setUser(JSON.parse(savedUser));
-  }, []);
 
   const menuItems = [
     { icon: <LayoutDashboard size={20} />, label: 'Dashboard', path: role === 'NGO' ? '/ngo/dashboard' : '/donor/dashboard' },

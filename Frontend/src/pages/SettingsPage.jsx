@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { Bell, Lock, Shield, Eye, EyeOff, Save, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 
-import { API_BASE as API } from '../utils/api';
+import { apiFetch } from '../utils/api';
 
 const DEFAULT_NOTIFICATIONS = [
   { id: 'new_donations', label: 'New Food Alerts', active: true, desc: 'Get notified when new food is available within 10km.' },
@@ -49,9 +49,8 @@ const SettingsPage = () => {
     }
     setPwLoading(true);
     try {
-      const res = await fetch(`${API}/api/users/${user.id}/password`, {
+      const res = await apiFetch(`/api/users/${user.id}/password`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentPassword, newPassword }),
       });
       if (res.ok) {

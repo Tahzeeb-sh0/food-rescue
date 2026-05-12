@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,7 +58,9 @@ public class UserController {
 
         User saved = userRepository.save(user);
         log.info("New user registered: role={}", saved.getRole());
-        return ResponseEntity.ok(UserResponse.from(saved));
+        UserResponse response = UserResponse.from(saved);
+        response.setToken(jwtUtil.generateToken(saved.getId(), saved.getRole().name()));
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
@@ -74,7 +77,11 @@ public class UserController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<?> updateProfile(@PathVariable String id,
-                                           @Valid @RequestBody UpdateProfileRequest request) {
+                                           @Valid @RequestBody UpdateProfileRequest request,
+                                           Authentication auth) {
+        if (auth == null || !id.equals(auth.getName())) {
+            return ResponseEntity.status(403).build();
+        }
         return userRepository.findById(id)
                 .map(u -> {
                     u.setName(request.getName());
@@ -86,7 +93,11 @@ public class UserController {
 
     @PatchMapping("/{id}/password")
     public ResponseEntity<String> changePassword(@PathVariable String id,
-                                                  @Valid @RequestBody ChangePasswordRequest request) {
+                                                  @Valid @RequestBody ChangePasswordRequest request,
+                                                  Authentication auth) {
+        if (auth == null || !id.equals(auth.getName())) {
+            return ResponseEntity.status(403).build();
+        }
         return userRepository.findById(id)
                 .map(u -> {
                     if (!passwordEncoder.matches(request.getCurrentPassword(), u.getPassword())) {

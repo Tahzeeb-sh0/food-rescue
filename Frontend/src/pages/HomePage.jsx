@@ -17,12 +17,13 @@ import {
   Warehouse
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { API_BASE } from '../utils/api';
 
 const HomePage = () => {
   const [stats, setStats] = useState({ meals: 0, co2: 0, ngos: 0 });
 
   useEffect(() => {
-    fetch('${API_BASE}/api/stats/impact')
+    fetch(`${API_BASE}/api/stats/impact`)
       .then(res => res.json())
       .then(data => setStats({
         meals: data.totalMeals || 0,

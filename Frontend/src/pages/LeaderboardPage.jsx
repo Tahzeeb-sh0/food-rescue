@@ -1,18 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Trophy, Leaf, Star, Loader2, Medal } from 'lucide-react';
+import { API_BASE } from '../utils/api';
 
 const MEDAL_COLORS = ['text-yellow-500', 'text-slate-400', 'text-amber-600'];
 const MEDAL_BG = ['bg-yellow-50 border-yellow-200', 'bg-slate-50 border-slate-200', 'bg-amber-50 border-amber-200'];
 
 const LeaderboardPage = () => {
   const [ngos, setNgos] = useState([]);
-  const [ratings, setRatings] = useState({});
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Fetch all NGOs and their donation history
     Promise.all([
-      fetch('${API_BASE}/api/users/ngos').then(r => r.json()),
+      fetch(`${API_BASE}/api/users/ngos`).then(r => r.json()),
     ])
       .then(async ([ngoList]) => {
         // For each NGO, fetch their completed pickups and rating

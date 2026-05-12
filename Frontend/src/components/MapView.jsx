@@ -1,24 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { MapPin, Info, Navigation, ShieldCheck, Users, Zap } from 'lucide-react';
 
 const MapView = ({ donations = [], type = 'NGO' }) => {
   // Simple Mock Map for demo (since we don't have Mapbox/Leaflet API keys)
   // type 'NGO' -> scans for donations
   // type 'DONOR' -> scans for nearby NGOs
-  
-  const [dots, setDots] = useState([]);
 
-  useEffect(() => {
-    // Generate some mock points based on type
-    const points = Array.from({ length: 6 }).map((_, i) => ({
-      id: i,
-      top: 20 + Math.random() * 60,
-      left: 20 + Math.random() * 60,
-      title: type === 'DONOR' ? `Verified NGO Hub #${i+102}` : (donations[i]?.title || 'Surplus Alert'),
-      capacity: type === 'DONOR' ? 'Active Dispatch' : (donations[i]?.capacity || 50)
-    }));
-    setDots(points);
-  }, [type, donations]);
+  const dots = useMemo(
+    () =>
+      Array.from({ length: 6 }).map((_, i) => ({
+        id: i,
+        top: 22 + ((i * 17) % 55),
+        left: 24 + ((i * 23) % 58),
+        title: type === 'DONOR' ? `Verified NGO Hub #${i + 102}` : donations[i]?.title || 'Surplus Alert',
+        capacity: type === 'DONOR' ? 'Active Dispatch' : donations[i]?.capacity || 50,
+      })),
+    [type, donations]
+  );
 
   return (
     <div className="bg-slate-950 rounded-[2rem] overflow-hidden border border-slate-800 shadow-2xl relative group h-full min-h-[500px]">

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Building2, Briefcase, Lock, CheckCircle2, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_BASE } from '../utils/api';
 
 const DonorRegisterPage = () => {
   const [corpName, setCorpName] = React.useState('');
@@ -15,7 +16,7 @@ const DonorRegisterPage = () => {
     setIsLoading(true);
     setError('');
     try {
-      const res = await fetch('${API_BASE}/api/users/register', {
+      const res = await fetch(`${API_BASE}/api/users/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

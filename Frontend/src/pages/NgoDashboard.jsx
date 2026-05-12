@@ -27,6 +27,7 @@ import {
   Star,
   SlidersHorizontal
 } from 'lucide-react';
+import { API_BASE, apiFetch } from '../utils/api';
 
 // ── Pickup Countdown Timer ─────────────────────────────────────────────────────
 const PickupCountdown = ({ claimedAt }) => {
@@ -95,7 +96,14 @@ const NgoDashboard = () => {
   const [claimError, setClaimError] = useState('');
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState(null);
+  const [user] = useState(() => {
+    try {
+      const saved = localStorage.getItem('user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
   const [viewMode, setViewMode] = useState('grid');
   const [fetchError, setFetchError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -106,6 +114,34 @@ const NgoDashboard = () => {
   const [radius, setRadius] = useState(10);
   // Alert queue: array of donation objects
   const [alerts, setAlerts] = useState([]);
+
+  const fetchNearby = useCallback((lon, lat, userId, radiusKm = 10) => {
+    setIsLoading(true);
+    setFetchError('');
+    fetch(`${API_BASE}/api/donations/nearby?lon=${lon}&lat=${lat}&radiusKm=${radiusKm}`)
+      .then(r => {
+        if (!r.ok) throw new Error('Failed');
+        return r.json();
+      })
+      .then(data => setDonations(data))
+      .catch(() => setFetchError('Could not load nearby donations. Check your connection and refresh.'))
+      .finally(() => setIsLoading(false));
+
+    apiFetch(`/api/donations/ngo/${userId}`)
+      .then(r => r.json())
+      .then(data => {
+        setHistory(data);
+        const active = data.find(d => d.status === 'CLAIMED');
+        if (active) setActiveClaim(active);
+      })
+      .catch(() => console.warn('History sync failed.'));
+  }, []);
+
+  const [nowTick, setNowTick] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNowTick(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   // Request browser notification permission on mount
   useEffect(() => {
@@ -138,39 +174,15 @@ const NgoDashboard = () => {
   }, [dismissAlert]);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      const parsedUser = JSON.parse(savedUser);
-      setUser(parsedUser);
-      fetchNearby(parsedUser.location?.x || -74.006, parsedUser.location?.y || 40.7128, parsedUser.id, radius);
-      fetch(`${API_BASE}/api/ratings/ngo/${parsedUser.id}/average`)
-        .then(r => r.json())
-        .then(data => setAvgRating(data))
-        .catch(() => {});
-    }
-  }, []);
-
-  const fetchNearby = (lon, lat, userId, radiusKm = 10) => {
-    setIsLoading(true);
-    setFetchError('');
-    fetch(`${API_BASE}/api/donations/nearby?lon=${lon}&lat=${lat}&radiusKm=${radiusKm}`)
-      .then(r => {
-        if (!r.ok) throw new Error('Failed');
-        return r.json();
-      })
-      .then(data => setDonations(data))
-      .catch(() => setFetchError('Could not load nearby donations. Check your connection and refresh.'))
-      .finally(() => setIsLoading(false));
-
-    fetch(`${API_BASE}/api/donations/ngo/${userId}`)
+    if (!user) return;
+    fetchNearby(user.location?.x || -74.006, user.location?.y || 40.7128, user.id, radius);
+    apiFetch(`/api/ratings/ngo/${user.id}/average`)
       .then(r => r.json())
-      .then(data => {
-        setHistory(data);
-        const active = data.find(d => d.status === 'CLAIMED');
-        if (active) setActiveClaim(active);
-      })
-      .catch(() => console.warn('History sync failed.'));
-  };
+      .then(data => setAvgRating(data))
+      .catch(() => {});
+    // radius changes are applied via handleRadiusChange (avoids duplicate fetches)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchNearby, user]);
 
   const handleRadiusChange = (newRadius) => {
     setRadius(newRadius);
@@ -180,7 +192,7 @@ const NgoDashboard = () => {
   };
 
   useEffect(() => {
-    const socket = new SockJS('${API_BASE}/ws');
+    const socket = new SockJS(`${API_BASE}/ws`);
     const client = Stomp.over(socket);
     client.debug = () => {};
 
@@ -207,7 +219,7 @@ const NgoDashboard = () => {
          const completed = JSON.parse(msg.body);
          if(activeClaim && activeClaim.id === completed.id) {
             setActiveClaim(completed);
-            if(user) fetch(`${API_BASE}/api/donations/ngo/${user.id}`).then(r => r.json()).then(setHistory);
+            if(user) apiFetch(`/api/donations/ngo/${user.id}`).then(r => r.json()).then(setHistory);
          }
       });
     });
@@ -219,9 +231,8 @@ const NgoDashboard = () => {
     if (!user) return;
     setClaimError('');
     try {
-      const res = await fetch(`${API_BASE}/api/donations/${donationId}/claim`, {
+      const res = await apiFetch(`/api/donations/${donationId}/claim`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ngoId: user.id })
       });
       if (res.ok) {
@@ -240,9 +251,8 @@ const NgoDashboard = () => {
     if (!user || !activeClaim) return;
     setCodeError('');
     try {
-      const res = await fetch(`${API_BASE}/api/donations/${activeClaim.id}/complete`, {
+      const res = await apiFetch(`/api/donations/${activeClaim.id}/complete`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ngoId: user.id, confirmationCode })
       });
       if (res.ok) {
@@ -563,7 +573,7 @@ const NgoDashboard = () => {
                           <span className="px-3 py-1.5 bg-primary-950/90 backdrop-blur-md text-white rounded-md text-[10px] font-bold uppercase tracking-widest border border-white/20">
                             {d.capacity} meals
                           </span>
-                          {d.createdAt && (Date.now() - new Date(d.createdAt)) > 60 * 60 * 1000 && (
+                          {d.createdAt && (nowTick - new Date(d.createdAt)) > 60 * 60 * 1000 && (
                             <span className="px-2 py-1.5 bg-red-500/90 backdrop-blur-md text-white rounded-md text-[10px] font-bold uppercase tracking-widest">
                               Expiring Soon
                             </span>

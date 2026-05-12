@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { Building2, ShieldCheck, Phone, Save, Loader2, Camera, CheckCircle, Globe } from 'lucide-react';
 
-import { API_BASE as API } from '../utils/api';
+import { apiFetch } from '../utils/api';
 
 const ProfilePage = () => {
   const [user, setUser] = useState(null);
@@ -49,9 +49,8 @@ const ProfilePage = () => {
     setIsLoading(true);
     setError('');
     try {
-      const res = await fetch(`${API}/api/users/${user.id}`, {
+      const res = await apiFetch(`/api/users/${user.id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: formData.name }),
       });
       if (res.ok) {

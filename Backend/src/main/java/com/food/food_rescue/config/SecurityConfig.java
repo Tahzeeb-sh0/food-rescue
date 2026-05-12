@@ -54,6 +54,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // Public endpoints — no token required
                 .requestMatchers(
+                    "/api/health",
                     "/api/users/register",
                     "/api/users/login",
                     "/api/users/forgot-password",
@@ -64,8 +65,10 @@ public class SecurityConfig {
                     "/api/users/ngos",
                     "/ws/**"
                 ).permitAll()
-                // Nearby donations — public read
-                .requestMatchers(HttpMethod.GET, "/api/donations/nearby").permitAll()
+                // Public donation and leaderboard reads (single-segment id, nearby, ngo aggregates)
+                .requestMatchers(HttpMethod.GET, "/api/donations/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/donations/ngo/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/ratings/ngo/**").permitAll()
                 // Everything else requires a valid JWT
                 .anyRequest().authenticated()
             )

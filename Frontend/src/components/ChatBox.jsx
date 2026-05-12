@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Send, Loader2, AlertCircle } from 'lucide-react';
 import { Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+import { API_BASE, apiFetch } from '../utils/api';
 
 const ChatBox = ({ donationId, currentUser }) => {
   const [messages, setMessages] = useState([]);
@@ -12,14 +13,15 @@ const ChatBox = ({ donationId, currentUser }) => {
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    // Reset state when donation changes — prevents messages from different donations mixing
-    setMessages([]);
-    setNewMessage('');
-    setHistoryError(false);
-    setIsLoadingHistory(true);
+    queueMicrotask(() => {
+      setMessages([]);
+      setNewMessage('');
+      setHistoryError(false);
+      setIsLoadingHistory(true);
+    });
 
     // Fetch history for this specific donation
-    fetch(`${API_BASE}/api/chat/${donationId}/history`)
+    apiFetch(`/api/chat/${donationId}/history`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to load');
         return res.json();
@@ -29,7 +31,7 @@ const ChatBox = ({ donationId, currentUser }) => {
       .finally(() => setIsLoadingHistory(false));
 
     // Connect WebSocket and subscribe to this donation's chat topic
-    const socket = new SockJS('${API_BASE}/ws');
+    const socket = new SockJS(`${API_BASE}/ws`);
     const client = Stomp.over(socket);
     client.debug = () => {};
 
@@ -44,7 +46,7 @@ const ChatBox = ({ donationId, currentUser }) => {
       });
     });
 
-    setStompClient(client);
+    queueMicrotask(() => setStompClient(client));
 
     return () => {
       if (client.connected) client.disconnect();

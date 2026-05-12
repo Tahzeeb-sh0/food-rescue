@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, HeartPulse, Globe2, ArrowRight, FileText, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { API_BASE } from '../utils/api';
 
 const ImpactPage = () => {
   const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch('${API_BASE}/api/stats/impact')
+    fetch(`${API_BASE}/api/stats/impact`)
       .then(res => {
         if (!res.ok) throw new Error('Failed');
         return res.json();
