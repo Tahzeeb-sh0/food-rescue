@@ -35,17 +35,19 @@ public class DonationService {
         donation.setCreatedAt(LocalDateTime.now());
         donation.setConfirmationCode(generateConfirmationCode());
         Donation savedDonation = donationRepository.save(donation);
-        
-        // Notify nearby NGOs using WebSocket (Real-time UI)
-        messagingTemplate.convertAndSend("/topic/donations/new", savedDonation);
-        
-        // Find NGOs within 10km to send SMS/Push
+
+        // Real-time UI + SMS/push: only NGOs within pickup radius (same query for all channels)
         if (donation.getPickupLocation() != null) {
             Point point = new Point(donation.getPickupLocation().getX(), donation.getPickupLocation().getY());
             Distance distance = new Distance(10, Metrics.KILOMETERS);
             List<User> nearbyNgos = userRepository.findByRoleAndLocationNear(com.food.food_rescue.model.Role.NGO, point, distance);
-            
-            // Trigger Push/SMS Notifications
+
+            for (User ngo : nearbyNgos) {
+                messagingTemplate.convertAndSend("/topic/ngo/" + ngo.getId() + "/donations/new", savedDonation);
+            }
+            log.info("[NOTIFY] New donation id={} broadcast to {} nearby NGO(s) on per-org topics",
+                    savedDonation.getId(), nearbyNgos.size());
+
             notificationService.sendPushAndSmsToNgos(savedDonation, nearbyNgos);
         }
 
