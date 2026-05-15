@@ -1,14 +1,14 @@
-import React from 'react'
+import React from 'react';
 
-import Layout from './components/layout/Layout'
-import Router from './routes/Router'
+import Layout from './components/layout/Layout';
+import Router from './routes/Router';
 
 const App = () => {
   return (
-    <div>
-      <Router/>
+    <div className="min-w-0 w-full overflow-x-clip">
+      <Router />
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;

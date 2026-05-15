@@ -57,12 +57,12 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-primary-950 text-white border-t border-primary-900 border-t-4">
-      <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-16 pb-8">
+    <footer className="bg-primary-950 text-white border-t-4 border-primary-900 min-w-0 overflow-x-clip">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pt-16 pb-8 min-w-0">
         
         {/* Top Info Banner */}
-        <div className="bg-primary-900 border border-primary-800 rounded p-8 md:p-10 mb-16 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
-          <div>
+        <div className="bg-primary-900 border border-primary-800 rounded p-6 sm:p-8 md:p-10 mb-16 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6 shadow-sm min-w-0">
+          <div className="min-w-0">
             <h3 className="text-2xl md:text-3xl font-bold font-serif mb-2">
               Transforming Surplus into Sustenance.
             </h3>
@@ -72,14 +72,14 @@ const Footer = () => {
           </div>
           <Link
             to="/donate"
-            className="btn-accent px-8"
+            className="btn-accent px-8 shrink-0 self-center md:self-auto text-center"
           >
             Start Donating Food
           </Link>
         </div>
 
         {/* Links Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-10 mb-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 sm:gap-10 mb-16 min-w-0">
           {/* Brand Column */}
           <div className="col-span-2 md:col-span-4 lg:col-span-1">
             <Link to="/" className="flex items-center gap-3 mb-6">
@@ -88,8 +88,8 @@ const Footer = () => {
               </div>
               <span className="text-xl font-bold font-serif tracking-tight">FoodRescue</span>
             </Link>
-            <p className="text-primary-200 text-sm leading-relaxed mb-6">
-              A registered 501(c)(3) maintaining zero tolerance for food waste through verified demographic targeting.
+            <p className="text-primary-200 text-sm leading-relaxed mb-6 break-words">
+              Connecting verified food donors with NGOs to cut waste and feed communities—safely and at scale.
             </p>
             {/* Contact Info */}
             <div className="space-y-4">
@@ -151,10 +151,12 @@ const Footer = () => {
 
             {/* Back to Top */}
             <button
+              type="button"
               onClick={scrollToTop}
-              className="px-4 py-2 bg-primary-900 border border-primary-800 hover:bg-primary-800 rounded flex items-center gap-2 transition-colors text-sm font-bold tracking-wide"
+              aria-label="Scroll back to top"
+              className="px-4 py-2 bg-primary-900 border border-primary-800 hover:bg-primary-800 rounded flex items-center gap-2 transition-colors text-sm font-bold tracking-wide focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary-950"
             >
-              TOP <ArrowUp className="w-4 h-4" />
+              Top <ArrowUp className="w-4 h-4" aria-hidden />
             </button>
           </div>
         </div>

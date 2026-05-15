@@ -17,6 +17,12 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     return <Navigate to={loginPath} state={{ from: location }} replace />;
   }
 
+  const token = localStorage.getItem('token');
+  if (!token) {
+    const loginPath = user.role === 'NGO' ? '/ngo/login' : '/donor/login';
+    return <Navigate to={loginPath} state={{ from: location, reason: 'no-token' }} replace />;
+  }
+
   if (requiredRole && user.role !== requiredRole) {
     const redirectPath = user.role === 'NGO' ? '/ngo/dashboard' : '/donor/dashboard';
     return <Navigate to={redirectPath} replace />;

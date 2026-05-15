@@ -32,17 +32,21 @@ import SettingsPage from "../pages/SettingsPage";
 import CompliancePage from "../pages/CompliancePage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import LeaderboardPage from "../pages/LeaderboardPage";
+import DonationPublicPage from "../pages/DonationPublicPage";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
+import SessionExpiredRedirect from "../components/SessionExpiredRedirect";
 
 const Router = () => {
   return (
-    <div>
+    <>
+      <SessionExpiredRedirect />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
           <Route path="/howitworks" element={<HowItWorksPage />} />
           <Route path="/impact" element={<ImpactPage />} />
           <Route path="/donate" element={<DonateLandingPage />} />
+          <Route path="/donation/:id" element={<DonationPublicPage />} />
           
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
@@ -104,7 +108,7 @@ const Router = () => {
           <Route path="/cookies" element={<CookiePolicyPage />} />
         </Route>
       </Routes>
-    </div>
+    </>
   );
 };
 

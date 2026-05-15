@@ -31,10 +31,19 @@ const DonorRegisterPage = () => {
       if (res.ok) {
         const user = await res.json();
         localStorage.setItem('user', JSON.stringify(user));
+        if (user.token) localStorage.setItem('token', user.token);
+        if (user.role) sessionStorage.setItem('activeRole', user.role);
         navigate('/donor/dashboard');
       } else {
-        const data = await res.json().catch(() => ({}));
-        setError(data.error || 'Registration failed. This phone number may already be registered.');
+        const raw = await res.text();
+        let msg = raw || 'Registration failed.';
+        try {
+          const j = JSON.parse(raw);
+          msg = typeof j === 'string' ? j : (j.message || j.error || raw);
+        } catch {
+          /* plain text body */
+        }
+        setError(msg);
       }
     } catch {
       setError('Could not connect to server. Please try again.');

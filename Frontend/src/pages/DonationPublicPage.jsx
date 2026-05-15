@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Utensils, Clock, CheckCircle, Package, ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
+import { Utensils, Clock, CheckCircle, Package, ArrowLeft, Loader2, AlertCircle, Printer, Link2 } from 'lucide-react';
 import { API_BASE } from '../utils/api';
 
 const STATUS_CONFIG = {
@@ -19,8 +19,16 @@ const DonationPublicPage = () => {
   const [donation, setDonation] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [linkCopied, setLinkCopied] = useState(false);
 
   useEffect(() => {
+    if (!id) {
+      queueMicrotask(() => {
+        setError('Invalid link.');
+        setIsLoading(false);
+      });
+      return;
+    }
     fetch(`${API_BASE}/api/donations/${id}`)
       .then(r => {
         if (!r.ok) throw new Error('Not found');
@@ -53,9 +61,9 @@ const DonationPublicPage = () => {
   const status = STATUS_CONFIG[donation.status] || STATUS_CONFIG.AVAILABLE;
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-24">
+    <div className="min-h-screen bg-slate-50 pb-24 print:bg-white print:pb-0">
       {/* Hero image */}
-      <div className="relative h-72 bg-slate-200 overflow-hidden">
+      <div className="relative h-72 bg-slate-200 overflow-hidden print:hidden">
         <img
           src={donation.photoUrl || 'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?auto=format&fit=crop&q=80&w=1200'}
           alt={donation.title}
@@ -97,6 +105,35 @@ const DonationPublicPage = () => {
                 <p className="text-sm font-bold text-slate-900">{fmt(donation.createdAt)}</p>
               </div>
             </div>
+          </div>
+
+          <div className="flex flex-wrap gap-3 mb-8 print:hidden">
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors"
+            >
+              <Printer size={16} /> Print summary
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const url = `${window.location.origin}/donation/${id}`;
+                navigator.clipboard.writeText(url).then(() => {
+                  setLinkCopied(true);
+                  setTimeout(() => setLinkCopied(false), 2000);
+                }).catch(() => {});
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors"
+            >
+              <Link2 size={16} /> {linkCopied ? 'Link copied' : 'Copy public link'}
+            </button>
+            <Link
+              to="/contact"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-primary-700 hover:bg-primary-50 transition-colors"
+            >
+              Report an issue
+            </Link>
           </div>
 
           {/* Timeline */}
@@ -141,7 +178,7 @@ const DonationPublicPage = () => {
         </div>
 
         {/* Promote the platform */}
-        <div className="structured-card bg-primary-900 text-white p-8 text-center">
+        <div className="structured-card bg-primary-900 text-white p-8 text-center print:hidden">
           <h3 className="text-xl font-bold font-serif mb-2">Have surplus food to donate?</h3>
           <p className="text-primary-200 text-sm mb-6">Join thousands of businesses rescuing food every day.</p>
           <Link to="/donor/register" className="btn-accent px-8">Start Donating</Link>

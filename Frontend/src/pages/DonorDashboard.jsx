@@ -27,7 +27,8 @@ import {
   Utensils,
   Star,
   Share2,
-  Map as MapIcon
+  Map as MapIcon,
+  Copy,
 } from 'lucide-react';
 // ── Star Rating Component ──────────────────────────────────────────────────────
 const StarRating = ({ value, onChange }) => (
@@ -172,6 +173,7 @@ const DonorDashboard = () => {
   const [ratingTarget, setRatingTarget] = useState(null);
   const [detailDonation, setDetailDonation] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
+  const [copiedCodeFor, setCopiedCodeFor] = useState(null);
   const [ratedIds, setRatedIds] = useState(() => {
     try { return JSON.parse(localStorage.getItem('ratedDonations') || '[]'); } catch { return []; }
   });
@@ -184,6 +186,10 @@ const DonorDashboard = () => {
       setUser(parsedUser);
       fetchData(parsedUser.id);
     }
+  }, []);
+
+  useEffect(() => {
+    sessionStorage.setItem('activeRole', 'DONOR');
   }, []);
 
   const fetchData = async (userId) => {
@@ -588,10 +594,24 @@ const DonorDashboard = () => {
 
                                   {d.status === 'CLAIMED' ? (
                                      <div className="space-y-6">
-                                        <div className="bg-slate-950 p-6 rounded-2xl flex flex-col items-center justify-center text-center shadow-2xl relative overflow-hidden group/code overflow-hidden">
+                                        <div className="bg-slate-950 p-4 sm:p-6 rounded-2xl flex flex-col items-center justify-center text-center shadow-2xl relative overflow-hidden group/code overflow-x-auto max-w-full">
                                            <div className="absolute inset-0 bg-primary-800/10 opacity-0 group-hover/code:opacity-100 transition-opacity"></div>
                                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] mb-3 relative z-10">Secure Handover Code</p>
-                                           <p className="text-6xl font-mono font-bold text-white tracking-[0.3em] font-serif italic mb-4 relative z-10">{d.confirmationCode}</p>
+                                           <p className="text-4xl sm:text-5xl md:text-6xl font-mono font-bold text-white tracking-[0.15em] sm:tracking-[0.3em] font-serif italic mb-4 relative z-10 whitespace-nowrap">{d.confirmationCode}</p>
+                                           <button
+                                             type="button"
+                                             onClick={() => {
+                                               if (!d.confirmationCode) return;
+                                               navigator.clipboard.writeText(String(d.confirmationCode)).then(() => {
+                                                 setCopiedCodeFor(d.id);
+                                                 setTimeout(() => setCopiedCodeFor(null), 2000);
+                                               }).catch(() => {});
+                                             }}
+                                             className="relative z-10 mb-3 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold uppercase tracking-widest transition-colors"
+                                           >
+                                             {copiedCodeFor === d.id ? <CheckCircle size={14} /> : <Copy size={14} />}
+                                             {copiedCodeFor === d.id ? 'Copied' : 'Copy code'}
+                                           </button>
                                            <p className="text-[10px] text-accent-500 font-bold uppercase tracking-widest relative z-10">Authorized Representative Only</p>
                                         </div>
                                         <div className="pt-2">

@@ -52,11 +52,21 @@ const RegisterPage = () => {
         body: JSON.stringify({ name, phone, password, role: 'NGO', longitude: -74.006, latitude: 40.7128 }),
       });
       if (res.ok) {
-        localStorage.setItem('user', JSON.stringify(await res.json()));
+        const data = await res.json();
+        localStorage.setItem('user', JSON.stringify(data));
+        if (data.token) localStorage.setItem('token', data.token);
+        if (data.role) sessionStorage.setItem('activeRole', data.role);
         navigate('/ngo/dashboard');
       } else {
-        const data = await res.json().catch(() => ({}));
-        setError(data.error || 'Registration failed. This phone number may already be registered.');
+        const raw = await res.text();
+        let msg = raw || 'Registration failed.';
+        try {
+          const j = JSON.parse(raw);
+          msg = typeof j === 'string' ? j : (j.message || j.error || raw);
+        } catch {
+          /* plain text body */
+        }
+        setError(msg);
       }
     } catch {
       setError('Could not connect to server. Please try again.');

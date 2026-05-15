@@ -37,23 +37,23 @@ const Header = () => {
   }, [location.pathname]);
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
+    <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm min-w-0 relative">
       {/* Corporate Top Bar */}
-      <div className="bg-primary-950 text-white py-1.5 px-4 text-xs font-semibold tracking-wider text-center sm:text-left flex justify-center sm:justify-between items-center max-w-7xl mx-auto">
-         <span className="hidden sm:inline">Global Food Rescue Initiative • Established 2026</span>
-         <a href="/ngo/login" className="hover:text-primary-300 transition-colors uppercase">NGO Portal Login →</a>
+      <div className="bg-primary-950 text-white py-1.5 px-3 sm:px-4 text-xs font-semibold tracking-wider flex flex-wrap items-center justify-center sm:justify-between gap-x-3 gap-y-1 max-w-7xl mx-auto min-w-0">
+         <span className="hidden sm:inline min-w-0 truncate max-w-[70vw] lg:max-w-none">Global Food Rescue Initiative • Established 2026</span>
+         <Link to="/ngo/login" className="shrink-0 hover:text-primary-300 transition-colors uppercase whitespace-nowrap">NGO Portal Login →</Link>
       </div>
 
-      <nav className="flex justify-between items-center py-4 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto">
+      <nav className="flex justify-between items-center gap-3 min-w-0 py-4 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto">
         
         {/* Logo Section */}
-        <Link to="/" className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary-800 rounded flex items-center justify-center">
+        <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 md:flex-initial md:min-w-0">
+          <div className="w-10 h-10 bg-primary-800 rounded flex items-center justify-center shrink-0">
              <ShieldCheck className="w-6 h-6 text-white" />
           </div>
-          <div>
-            <h1 className="text-xl font-bold font-serif text-slate-900 tracking-tight leading-none">FoodRescue</h1>
-            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">International Network</p>
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-xl font-bold font-serif text-slate-900 tracking-tight leading-none truncate">FoodRescue</h1>
+            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1 truncate">International Network</p>
           </div>
         </Link>
 
@@ -63,7 +63,7 @@ const Header = () => {
             <li key={link.name}>
               <Link
                 to={link.path}
-                className={`flex items-center gap-2 px-4 py-2 rounded text-sm font-semibold transition-all duration-200 ${
+                className={`flex items-center gap-2 px-4 py-2 rounded text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 ${
                   isActive(link.path)
                     ? 'bg-primary-50 text-primary-800'
                     : 'text-slate-600 hover:text-primary-700 hover:bg-slate-50'
@@ -77,12 +77,15 @@ const Header = () => {
         </ul>
 
         {/* CTA Buttons */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-2 lg:gap-3 shrink-0">
           {/* NGO Dropdown */}
           <div className="relative" ref={dropdownRef}>
             <button
+              type="button"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-700 bg-white hover:bg-slate-50 rounded border border-slate-200 transition-all duration-200"
+              aria-expanded={isDropdownOpen}
+              aria-haspopup="true"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-700 bg-white hover:bg-slate-50 rounded border border-slate-200 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
             >
               <Users className="w-4 h-4" />
               Partner Access
@@ -107,18 +110,20 @@ const Header = () => {
           {/* Primary CTA */}
           <Link
             to="/donate"
-            className="flex items-center gap-2 px-6 py-2 bg-accent-600 hover:bg-accent-700 text-white text-sm font-bold rounded shadow-sm transition-all duration-200 border border-transparent"
+            className="flex items-center gap-2 px-6 py-2 bg-accent-600 hover:bg-accent-700 text-white text-sm font-bold rounded shadow-sm transition-all duration-200 border border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2"
           >
             <Heart className="w-4 h-4" />
-              Donate Food
+            Donate Food
           </Link>
         </div>
 
         {/* Mobile Menu Button */}
         <button
+          type="button"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-          className="md:hidden p-2 rounded text-slate-600 hover:bg-slate-100 transition-colors"
+          aria-expanded={isMenuOpen}
+          className="md:hidden p-2 rounded text-slate-600 hover:bg-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
         >
           {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
@@ -126,14 +131,14 @@ const Header = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-slate-200 shadow-lg z-50">
+        <div className="md:hidden absolute top-full left-0 right-0 max-h-[min(85dvh,32rem)] overflow-y-auto overscroll-contain bg-white border-b border-slate-200 shadow-lg z-50">
           <div className="px-4 py-4 space-y-2">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
                 onClick={() => setIsMenuOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded text-base font-semibold ${
+                className={`flex items-center gap-3 px-4 py-3 rounded text-base font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 ${
                   isActive(link.path)
                     ? 'bg-primary-50 text-primary-800'
                     : 'text-slate-600 hover:bg-slate-50'
@@ -158,10 +163,10 @@ const Header = () => {
             <Link
               to="/donate"
               onClick={() => setIsMenuOpen(false)}
-              className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-accent-600 hover:bg-accent-700 text-white font-bold rounded shadow-sm mt-3"
+              className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-accent-600 hover:bg-accent-700 text-white font-bold rounded shadow-sm mt-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-inset"
             >
               <Heart className="w-5 h-5" />
-                Donate Food
+              Donate Food
             </Link>
           </div>
         </div>

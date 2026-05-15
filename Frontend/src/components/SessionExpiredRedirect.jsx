@@ -9,7 +9,15 @@ export default function SessionExpiredRedirect() {
 
   useEffect(() => {
     const onExpired = () => {
-      const role = sessionStorage.getItem('activeRole');
+      let role = sessionStorage.getItem('activeRole');
+      if (!role) {
+        try {
+          const raw = localStorage.getItem('user');
+          if (raw) role = JSON.parse(raw)?.role;
+        } catch {
+          /* ignore */
+        }
+      }
       sessionStorage.removeItem('activeRole');
       localStorage.removeItem('token');
       localStorage.removeItem('user');

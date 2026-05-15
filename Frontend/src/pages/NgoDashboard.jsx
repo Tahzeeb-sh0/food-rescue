@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import DashboardLayout from '../components/layout/DashboardLayout';
@@ -28,6 +28,18 @@ import {
   SlidersHorizontal
 } from 'lucide-react';
 import { API_BASE, apiFetch } from '../utils/api';
+
+/** Great-circle distance in km (WGS84 lon/lat). */
+function kmBetween(lon1, lat1, lon2, lat2) {
+  const R = 6371;
+  const toRad = (d) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+}
 
 // ── Pickup Countdown Timer ─────────────────────────────────────────────────────
 const PickupCountdown = ({ claimedAt }) => {
@@ -112,6 +124,10 @@ const NgoDashboard = () => {
   const [avgRating, setAvgRating] = useState(null);
   const [detailDonation, setDetailDonation] = useState(null);
   const [radius, setRadius] = useState(10);
+  const radiusRef = useRef(radius);
+  useEffect(() => {
+    radiusRef.current = radius;
+  }, [radius]);
   // Alert queue: array of donation objects
   const [alerts, setAlerts] = useState([]);
 
@@ -148,6 +164,10 @@ const NgoDashboard = () => {
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
     }
+  }, []);
+
+  useEffect(() => {
+    sessionStorage.setItem('activeRole', 'NGO');
   }, []);
 
   const dismissAlert = useCallback((donationId) => {
@@ -192,15 +212,38 @@ const NgoDashboard = () => {
   };
 
   useEffect(() => {
+    if (!user?.id) return;
+
     const socket = new SockJS(`${API_BASE}/ws`);
     const client = Stomp.over(socket);
     client.debug = () => {};
 
+    const withinSearchRadius = (donation) => {
+      const nLon = user.location?.x;
+      const nLat = user.location?.y;
+      const pl = donation.pickupLocation;
+      let dLon;
+      let dLat;
+      if (Array.isArray(pl?.coordinates) && pl.coordinates.length >= 2) {
+        [dLon, dLat] = pl.coordinates;
+      } else if (pl?.x != null && pl?.y != null) {
+        dLon = pl.x;
+        dLat = pl.y;
+      } else {
+        return true;
+      }
+      if (nLon == null || nLat == null) return true;
+      return kmBetween(nLon, nLat, dLon, dLat) <= radiusRef.current;
+    };
+
     client.connect({}, () => {
-      client.subscribe('/topic/donations/new', (msg) => {
+      client.subscribe(`/topic/ngo/${user.id}/donations/new`, (msg) => {
         const newDonation = JSON.parse(msg.body);
-        setDonations(prev => [newDonation, ...prev]);
-        // Trigger the alert banner + browser notification
+        if (!withinSearchRadius(newDonation)) return;
+        setDonations((prev) => {
+          if (prev.some((d) => d.id === newDonation.id)) return prev;
+          return [newDonation, ...prev];
+        });
         showAlert(newDonation);
       });
       client.subscribe('/topic/donations/claimed', (msg) => {
@@ -538,9 +581,11 @@ const NgoDashboard = () => {
               </div>
 
               {/* Radius Slider */}
-              <div className="flex items-center gap-4 bg-white px-5 py-3 rounded-xl border border-slate-200 shadow-sm">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 bg-white px-4 sm:px-5 py-3 rounded-xl border border-slate-200 shadow-sm min-w-0">
+                <div className="flex items-center gap-3 sm:contents min-w-0">
                 <SlidersHorizontal size={16} className="text-slate-400 shrink-0" />
                 <span className="text-xs font-bold text-slate-500 uppercase tracking-widest shrink-0">Search Radius</span>
+                </div>
                 <input
                   type="range"
                   min="5"
@@ -548,10 +593,10 @@ const NgoDashboard = () => {
                   step="5"
                   value={radius}
                   onChange={(e) => handleRadiusChange(parseInt(e.target.value))}
-                  className="flex-1 accent-primary-700"
+                  className="w-full sm:flex-1 min-h-[44px] min-w-0 accent-primary-700"
                   aria-label="Search radius in km"
                 />
-                <span className="text-sm font-bold text-primary-700 w-14 text-right shrink-0">{radius} km</span>
+                <span className="text-sm font-bold text-primary-700 w-14 text-right shrink-0 self-end sm:self-auto">{radius} km</span>
               </div>
               
               {isLoading ? (

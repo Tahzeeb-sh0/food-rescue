@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Phone, Lock, LogIn, ArrowLeft, Loader2, Eye, EyeOff, Heart } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { API_BASE } from '../utils/api';
 
 const InputField = ({ label, icon: Icon, type = 'text', value, onChange, placeholder, autoComplete, extra }) => {
@@ -37,7 +37,19 @@ const DonorLoginPage = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [info, setInfo] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.sessionExpired) {
+      setInfo('Your session expired. Please sign in again.');
+      navigate(location.pathname, { replace: true, state: {} });
+    } else if (location.state?.reason === 'no-token') {
+      setInfo('Please sign in again to access your account.');
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.pathname, location.state, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -53,6 +65,7 @@ const DonorLoginPage = () => {
         const userData = await res.json();
         localStorage.setItem('user', JSON.stringify(userData));
         if (userData.token) localStorage.setItem('token', userData.token);
+        if (userData.role) sessionStorage.setItem('activeRole', userData.role);
         if (userData.role === 'DONOR') {
           navigate('/donor/dashboard');
         } else {
@@ -138,6 +151,13 @@ const DonorLoginPage = () => {
               <input id="remember" type="checkbox" className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500 cursor-pointer" />
               <label htmlFor="remember" className="text-sm text-slate-500 cursor-pointer select-none">Remember me</label>
             </div>
+
+            {info && (
+              <div className="flex items-center gap-2 px-4 py-3 bg-amber-50 border border-amber-100 rounded-xl text-sm text-amber-900">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                {info}
+              </div>
+            )}
 
             {error && (
               <div className="flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-100 rounded-xl text-sm text-red-700">
